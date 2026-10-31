@@ -415,6 +415,9 @@ const MERMAID_URL = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
 const EMB = document.getElementById("mdData");
 const EMBEDDED = !!(EMB && EMB.dataset.name);
 const PAGE_OFFLINE = LIBS.some((l) => l.inline != null);
+// EasyMindMap attachment mode: /md-editor/?att=<attachment id>&api=<API origin>&name=<file name>
+const QS = new URLSearchParams(location.search);
+const EMM = QS.get("att") ? { att: QS.get("att"), api: (QS.get("api") || location.origin).replace(/\/+$/, ""), name: QS.get("name") || "첨부.md", base: null, readOnly: false } : null;
 function libFail() { // libraries could not load (offline + online-type file): still let the user read and keep the text
   const text = EMB ? EMB.value : "";
   document.body.innerHTML = "";
@@ -489,14 +492,14 @@ graph LR
 \`\`\`
 `;
 
-let md = EMBEDDED ? EMB.value : (localStorage.getItem("mde.md") ?? SAMPLE);
+let md = EMM ? "" : EMBEDDED ? EMB.value : (localStorage.getItem("mde.md") ?? SAMPLE);
 let mode = localStorage.getItem("mde.mode") || "split";
 let lastFocus = "src";
 let wwFocused = false;
 let wwStale = false;
 let wwUserOp = false;
-let fileName = EMBEDDED ? EMB.dataset.name : "document.md";
-const DOC = { kind: EMBEDDED ? (PAGE_OFFLINE ? "offline" : "online") : "md", handle: null, saved: md, fileBound: EMBEDDED };
+let fileName = EMM ? EMM.name : EMBEDDED ? EMB.dataset.name : "document.md";
+const DOC = { kind: EMM ? "emm" : EMBEDDED ? (PAGE_OFFLINE ? "offline" : "online") : "md", handle: null, saved: md, fileBound: EMBEDDED || !!EMM };
 const tocFold = new Set();
 const outFold = new Set();
 
@@ -716,7 +719,7 @@ function setAll(text, origin) {
 function afterChange() {
   renderToc();
   if (mode === "outline") renderOutline();
-  if (!EMBEDDED) localStorage.setItem("mde.md", md);
+  if (!EMBEDDED && !EMM) localStorage.setItem("mde.md", md);
   updStatus();
   clearTimeout(tPost);
   tPost = setTimeout(() => postToParent({ type: "mde:change", markdown: md }), 400);
@@ -1650,7 +1653,7 @@ $("#sReset").onclick = () => { S.custom = {}; saveSettings(); applySettings(); d
 
 /* ---------- file menu: open / save / save as / md.html (online, offline) / close ---------- */
 const FS_OK = typeof window.showSaveFilePicker === "function";
-const KIND_LABEL = { md: ".md", online: "md.html 온라인", offline: "md.html 오프라인" };
+const KIND_LABEL = { md: ".md", online: "md.html 온라인", offline: "md.html 오프라인", emm: "EMM 첨부" };
 const baseName = () => fileName.replace(/\.html?$/i, "").replace(/\.(md|markdown|txt)$/i, "") || "document";
 const nameFor = (kind) => baseName() + (kind === "md" ? ".md" : ".md.html");
 const isDirty = () => md !== DOC.saved;
@@ -1701,7 +1704,63 @@ async function writeTo(kind, asNew) {
   updStatus(); flash(`${fileName} (${KIND_LABEL[kind]}) ${how}`);
   return true;
 }
-const doSave = () => writeTo(DOC.kind, false);
+const doSave = () => (DOC.kind === "emm" ? emmSave(false) : writeTo(DOC.kind, false));
+
+/* ---------- EasyMindMap attachment: load and save back ---------- */
+function emmToken() { // same origin as the app: read the current session token the app keeps refreshed; fall back to #t=
+  try {
+    const raw = localStorage.getItem("emm.auth");
+    if (raw) {
+      const find = (o, d) => { if (!o || typeof o !== "object" || d > 6) return null; for (const k of ["access_token", "accessToken"]) if (typeof o[k] === "string" && o[k]) return o[k]; for (const v of Object.values(o)) { const r = find(v, d + 1); if (r) return r; } return null; };
+      const t = find(JSON.parse(raw), 0); if (t) return t;
+    }
+  } catch {}
+  return new URLSearchParams(location.hash.slice(1)).get("t") || "";
+}
+async function sha256Hex(data) {
+  const buf = typeof data === "string" ? new TextEncoder().encode(data) : data;
+  const d = await crypto.subtle.digest("SHA-256", buf);
+  return [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+function emmErr(s) {
+  return { 401: "로그인이 만료되었습니다. EasyMindMap 탭에서 첨부를 다시 열어 주세요.", 403: "이 첨부를 고칠 권한이 없습니다 (읽기 전용).", 404: "첨부를 찾을 수 없거나 볼 권한이 없습니다.",
+    413: "용량 한도를 넘었습니다.", 415: "이 형식의 첨부는 저장할 수 없습니다." }[s] || "서버 오류 (" + s + ")";
+}
+const emmUrl = (suffix) => EMM.api + "/v1/attachments/" + encodeURIComponent(EMM.att) + (suffix || "");
+async function emmLoad() {
+  flash("EasyMindMap 첨부를 불러오는 중…");
+  try {
+    const r = await fetch(emmUrl(), { headers: { Authorization: "Bearer " + emmToken() } });
+    if (!r.ok) throw new Error(emmErr(r.status));
+    const buf = await r.arrayBuffer();
+    EMM.base = await sha256Hex(buf);
+    setAll(new TextDecoder("utf-8").decode(buf).replace(/^\uFEFF/, "").replace(/\r\n/g, "\n"), "file");
+    DOC.saved = md; updStatus(); flash("불러왔습니다: " + EMM.name);
+  } catch (e) { flash("불러오지 못했습니다"); alert("첨부를 불러오지 못했습니다: " + e.message); }
+}
+let emmSaving = false;
+async function emmSave(force) {
+  if (emmSaving) return;
+  if (EMM.readOnly) return alert("읽기 전용 첨부입니다. 파일 메뉴의 '.md로 저장'으로 내 PC에 따로 저장할 수 있습니다.");
+  emmSaving = true; flash("EasyMindMap에 저장 중…");
+  try {
+    const body = new TextEncoder().encode(md);
+    const headers = { Authorization: "Bearer " + emmToken(), "Content-Type": "text/markdown; charset=utf-8" };
+    if (EMM.base && !force) headers["If-Match"] = '"sha256:' + EMM.base + '"';
+    const r = await fetch(emmUrl("/content"), { method: "PUT", headers, body });
+    if (r.status === 409) {
+      emmSaving = false;
+      if (confirm("다른 사람(또는 다른 탭)이 이 첨부를 먼저 고쳤습니다.\n\n[확인] 내 내용으로 덮어쓰기\n[취소] 저장하지 않기 (파일 메뉴의 '.md로 저장'으로 내 내용을 따로 보관할 수 있습니다)")) return emmSave(true);
+      return flash("저장하지 않았습니다 (다른 곳에서 먼저 고침)");
+    }
+    if (r.status === 403) EMM.readOnly = true;
+    if (!r.ok) throw new Error(emmErr(r.status));
+    EMM.base = await sha256Hex(body);
+    DOC.saved = md; updStatus(); flash("EasyMindMap 첨부에 저장했습니다");
+    try { window.opener && window.opener.postMessage({ type: "mde:attachment-saved", att: EMM.att, sizeBytes: body.length }, location.origin); } catch {}
+  } catch (e) { flash("저장하지 못했습니다"); alert("저장하지 못했습니다: " + e.message); }
+  finally { emmSaving = false; }
+}
 async function loadFile(f, h) {
   let text = await f.text(), kind = "md";
   if (/\.html?$/i.test(f.name)) {
@@ -1737,7 +1796,7 @@ const ACTS = {
   open: doOpen,
   sample: () => askDiscard() && newDoc(SAMPLE, "예제.md"),
   save: doSave,
-  saveas: () => writeTo(DOC.kind, true),
+  saveas: () => writeTo(DOC.kind === "emm" ? "md" : DOC.kind, true),
   md: () => writeTo("md", true),
   online: () => writeTo("online", true),
   offline: () => writeTo("offline", true),
@@ -1829,6 +1888,7 @@ window.MDE = { openCode, openLink, fmt, settings: S, applySettings, outline: { g
 applySettings();
 setMode(mode);
 schedulePreviews();
+if (EMM) { $("#saveBtn").textContent = "EMM에 저장"; $("#saveBtn").title = "EasyMindMap 첨부에 저장 (Ctrl+S)"; emmLoad(); }
 renderToc();
 updStatus();
 postToParent({ type: "mde:ready" });
