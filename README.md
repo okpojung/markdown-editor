@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" width="120" alt="markdown-editor logo"></p>
+
 # markdown-editor
 
 브라우저에서 바로 쓰는 마크다운 편집기입니다. 설치나 서버 없이 `index.html` 하나로 동작합니다.
@@ -46,7 +48,15 @@ Chrome·Edge에서는 처음 저장할 때 파일 위치를 고르면 그다음�
 - [Mermaid](https://mermaid.js.org/) (MIT) — 다이어그램
 - 색 값: VS Code 기본 테마(`extensions/theme-defaults`)
 
+## EasyMindMap 연동
+
+`index.html?att=<첨부 id>&api=<API 주소>&name=<파일명>`으로 열면 EasyMindMap 첨부(.md)를 불러오고, `EMM에 저장`(Ctrl+S)으로 같은 첨부에 저장합니다(`PUT /v1/attachments/:id/content`, `If-Match: "sha256:…"` 충돌 검사). 토큰은 같은 출처의 `localStorage["emm.auth"]` 또는 `#t=`로 받습니다.
+
 ## 임베드(iframe)
 
 `postMessage`로 문서를 주고받습니다: `mde:set`, `mde:get` → `mde:markdown`, `mde:mode`, 변경 시 `mde:change`, 닫기 시 `mde:close`.
 실서비스에 붙일 때는 허용할 출처(origin)만 받도록 바꿔야 합니다.
+
+## 라이선스
+
+[MIT](LICENSE) © 2026 okpojung
