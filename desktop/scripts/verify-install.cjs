@@ -24,7 +24,7 @@ const exec=(command,args)=>new Promise((resolve,reject)=>{const p=cp.spawn(comma
   }else{
    const deb=path.join(release,files.find(f=>f.endsWith('.deb')));
    if((await fs.readFile(deb)).subarray(0,8).toString()!=='!<arch>\n')throw new Error('Invalid Debian package');
-   await exec('sudo',['dpkg','-i',deb]);
+   await exec('sudo',['apt-get','install','-y',deb]);
    installedPackage=cp.execFileSync('dpkg-deb',['-f',deb,'Package'],{encoding:'utf8'}).trim();
    binary='/usr/bin/markdown-editor';
    const image=path.join(release,files.find(f=>f.endsWith('.AppImage')));

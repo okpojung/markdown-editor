@@ -25,3 +25,9 @@ Windows는 퍼블리셔 인증서 미제공으로 Authenticode 미서명입니�
 CI는 합성 파일만 사용하며 macOS DMG 복사/실행, Windows NSIS 무인 설치/실행/제거, Linux DEB 설치/실행/제거를 검사합니다. AppImage는 형식 검사를 하며 FUSE와 배포판별 실행 환경은 사용자 환경에 따라 다를 수 있습니다. Linux CI 실행에서만 headless 환경 때문에 --no-sandbox를 쓰며 정상 앱 실행 설정에는 넣지 않습니다. 실제 사용자의 각 OS에서 수행한 수동 설치 검증은 아닙니다.
 
 각 artifact에는 설치 파일, SHA256SUMS.txt, 빌드 source commit/run ID/lock 해시와 native smoke 결과, 가능한 경우 실행 화면이 포함됩니다.
+
+## 설치
+- Windows: `.exe`를 실행하고 사용자 계정용 설치 마법사를 진행합니다.
+- macOS: CPU에 맞는 DMG를 열고 Markdown Editor.app을 Applications로 복사합니다. Developer ID/공증 미완료 상태임을 확인하세요.
+- Ubuntu/Debian: 설치 파일 폴더에서 `sudo apt install ./MarkdownEditor-1.0.0-linux-amd64.deb`로 설치하면 필요한 시스템 의존성을 함께 설치합니다. `dpkg -i`만 쓰면 빠진 의존성 때문에 설정이 완료되지 않을 수 있습니다.
+- AppImage: 파일에 실행 권한을 주고 실행합니다. FUSE·샌드박스 지원은 배포판별로 다르며, 이 빌드에서는 실제 DEB 설치 후 실행을 검증합니다.
