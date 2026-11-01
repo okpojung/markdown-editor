@@ -6,7 +6,7 @@ COPY assets/ /usr/share/nginx/html/editor/assets/
 COPY LICENSE /usr/share/nginx/html/LICENSE
 COPY deployment/standalone-guard.js /usr/share/nginx/html/editor/standalone-guard.js
 # 기존 EMM 배포용 원본은 보존하고 독립 웹 서비스 사본에만 보호 스크립트 삽입
-RUN awk '/<head>/{print; print "<script>"; while ((getline line < "/usr/share/nginx/html/editor/standalone-guard.js") > 0) print line; print "</script>"; next} {print}' /usr/share/nginx/html/editor/index.html > /tmp/editor.html \
+RUN awk '/<script id="appMain">/{inmain=1} {print} inmain && /^"use strict";/{while ((getline line < "/usr/share/nginx/html/editor/standalone-guard.js") > 0) print line; inmain=0}' /usr/share/nginx/html/editor/index.html > /tmp/editor.html \
     && mv /tmp/editor.html /usr/share/nginx/html/editor/index.html \
     && mkdir -p /usr/share/nginx/html/downloads \
     && cp /usr/share/nginx/html/editor/index.html /usr/share/nginx/html/downloads/markdown-editor.html

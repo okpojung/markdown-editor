@@ -2,5 +2,5 @@
 window.addEventListener('message', function (event) {
   var data = event.data;
   if (!data || typeof data !== 'object' || typeof data.type !== 'string' || !data.type.startsWith('mde:')) return;
-  if (event.origin !== location.origin || (event.source !== window.parent && event.source !== window.opener)) event.stopImmediatePropagation();
+  if (location.origin === 'null' || event.origin !== location.origin || (event.source !== window.parent && event.source !== window.opener)) event.stopImmediatePropagation();
 }, true);
