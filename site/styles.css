@@ -138,3 +138,66 @@
 @media(max-width:600px){.hero-art{max-width:100%;margin-inline:auto}}
 
 @media(max-width:600px){.hero{grid-template-columns:minmax(0,1fr)}.hero-copy{min-width:0}}
+
+/* Language picker: image-matched flag/code trigger and floating native-language menu. */
+html{max-width:100%}
+body{min-width:0}
+.header-inner,.header-actions,.hero-copy,.hero-art,.section-heading>*,.demo-panels,.demo-panel,.split-source,.split-render,.download-copy{min-width:0}
+.header-inner .brand{flex-shrink:0}
+.lang-picker{position:relative;flex-shrink:0}
+.flag-sprite{position:absolute;width:0;height:0;overflow:hidden}
+.lang-toggle{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:9px 12px;border:1px solid var(--ink);border-radius:13px;background:transparent;color:var(--ink);font-size:13px;font-weight:700;line-height:1.4}
+.lang-toggle:hover,.lang-toggle[aria-expanded="true"]{background:var(--paper-deep)}
+.lang-flag{display:block;flex-shrink:0;width:32px;height:22px;border-radius:3px;border:1px solid #dcded5;overflow:hidden}
+.lang-panel{position:absolute;right:0;top:calc(100% + 12px);width:240px;max-width:calc(100vw - 32px);padding:9px;background:#fff;border:1px solid #e0e4e7;border-radius:16px;box-shadow:0 14px 36px #182c3a26;z-index:80}
+.lang-option{display:flex;align-items:center;gap:15px;width:100%;min-height:60px;border-radius:9px;background:transparent;padding:10px 13px;text-align:left;color:var(--ink);font-size:16px;font-weight:400}
+.lang-option:hover,.lang-option:focus-visible{background:#f2f4f5}
+.lang-native{flex:1;white-space:nowrap}
+.lang-code{font-size:13px;color:#7b8790}
+.lang-check{display:none;color:#7b8790;flex-shrink:0}
+.lang-option[aria-checked="true"]{font-weight:700}
+.lang-option[aria-checked="true"] .lang-code{display:none}
+.lang-option[aria-checked="true"] .lang-check{display:block}
+.resource-language-note{margin:-9px 0 24px;font-size:13px;color:#4a5960;line-height:1.9}
+html:not([lang="ko"]) body{word-break:normal;overflow-wrap:anywhere}
+html:not([lang="ko"]) .hero h1{letter-spacing:-2px;font-size:clamp(38px,4.1vw,62px)}
+html:not([lang="ko"]) .hero-actions{flex-wrap:wrap;gap:18px}
+html:not([lang="ko"]) .feature-card p{min-height:0}
+html:not([lang="ko"]) .feature-keyword{min-height:0}
+html:not([lang="ko"]) .handwritten{font-size:20px}
+html:not([lang="ko"]) .scratch-note{overflow-wrap:normal}
+html:not([lang="ko"]) .benefit-strip{font-size:11px}
+html:not([lang="ko"]) .editor-titlebar>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html:not([lang="ko"]) .editor-status{flex-wrap:wrap;gap:7px}
+html:not([lang="ko"]) .download-actions{flex-wrap:wrap}
+@media(max-width:1200px){.header-actions{gap:9px}.lang-panel{right:0}.main-nav{white-space:normal}}
+@media(max-width:800px){
+ .hero-art{width:100%;margin-left:0;min-width:0}
+ .hero{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ html:not([lang="ko"]) .hero h1{font-size:clamp(31px,4.7vw,42px);letter-spacing:-1.3px}
+ html:not([lang="ko"]) .handwritten{font-size:17px}
+ html:not([lang="ko"]) .benefit-strip{font-size:9px}
+}
+@media(max-width:600px){
+ .header-actions{gap:7px}
+ .lang-toggle{gap:6px;padding:9px 8px;font-size:11px}
+ .lang-toggle .lang-flag{width:26px;height:18px}
+ .lang-panel{right:-40px}
+ .hero{grid-template-columns:minmax(0,1fr)}
+ .hero-art{width:320px;max-width:100%;margin-inline:auto}
+ html:not([lang="ko"]) .hero h1{font-size:clamp(35px,9vw,49px);letter-spacing:-1.8px}
+ html:not([lang="ko"]) .benefit-strip{font-size:10px}
+ html:not([lang="ko"]) .download-actions .button{white-space:normal}
+ html:not([lang="ko"]) .theme-toggle{flex-shrink:0}
+ html:not([lang="ko"]) .feature-card h3{font-size:14px}
+ .resource-language-note{font-size:12px}
+}
+@media(max-width:480px){
+ .header-inner .brand>span{display:none}
+ .header-inner .brand img{width:32px;height:32px}
+ .header-inner .brand{margin-right:auto}
+ .header-actions{margin-left:0}
+}
+
+/* Leave a two-pixel safety margin for the scaled decorative card at tablet widths. */
+@media (min-width:601px) and (max-width:800px){.hero-art{width:calc(100% - 2px)}}

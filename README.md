@@ -60,3 +60,14 @@ Chrome·Edge에서는 처음 저장할 때 파일 위치를 고르면 그다음�
 ## 라이선스
 
 [MIT](LICENSE) © 2026 okpojung
+
+
+## 홈페이지 언어 선택
+
+[홈페이지](https://md-editor.baro.me/)와 [왜 Markdown?](https://md-editor.baro.me/why-markdown/)는 한국어·영어·일본어·중국어(간체)를 지원합니다. 상단 국기/언어 버튼을 누르고 언어를 선택하세요. 현재 선택에는 체크가 표시됩니다.
+
+- [한국어](https://md-editor.baro.me/?lang=ko) · [English](https://md-editor.baro.me/?lang=en) · [日本語](https://md-editor.baro.me/?lang=ja) · [中文](https://md-editor.baro.me/?lang=zh)
+- 주소의 `lang` 선택이 우선이며, 없으면 이전 선택을 기억합니다. 저장된 선택도 없으면 한국어로 표시합니다. 브라우저 언어에 따라 자동 이동하지 않습니다.
+- 홈/상세페이지를 이동해도 언어가 유지됩니다. 제목·설명·본문·체험 UI·접근성 이름을 함께 바꿉니다. 기사 원제·출처명은 인용 정확성을 위해 원문을 유지합니다.
+- 언어 메뉴는 방향키, Home/End, Enter, Escape로 조작할 수 있습니다. 외부 기사, GitHub, 편집기는 안전한 새 탭으로 열립니다.
+- 언어 전환에는 JavaScript가 필요합니다. 이번 변경은 홈페이지/설명 페이지이며 편집기 원본과 EMM 코드는 변경하지 않습니다.
