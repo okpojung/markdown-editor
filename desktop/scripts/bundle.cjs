@@ -13,6 +13,7 @@ function replaceOnce(text, before, after) {
 (async () => {
   const manifest = JSON.parse(await fs.readFile(path.join(root,'source/vendor-manifest.json'),'utf8'));
   const appDir = path.join(root,'app');
+  await fs.mkdir(path.join(root,'build'),{recursive:true});
   await fs.mkdir(path.join(appDir,'vendor'),{recursive:true});
   for (const asset of manifest.assets) {
     if (!/^[a-zA-Z0-9_.-]+$/.test(asset.id) || asset.url !== 'vendor/'+asset.id) throw new Error('Invalid asset path');
