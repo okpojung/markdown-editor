@@ -40,7 +40,7 @@
 
   const demo = document.getElementById('demo-editor');
   const themeToggle = document.querySelector('.theme-toggle');
-  themeToggle.addEventListener('click', () => {
+  if (demo && themeToggle) themeToggle.addEventListener('click', () => {
     const dark = demo.dataset.theme !== 'dark';
     demo.dataset.theme = dark ? 'dark' : 'light';
     themeToggle.setAttribute('aria-pressed', String(dark));
@@ -70,6 +70,6 @@
   document.addEventListener('click', event => {
     if (!event.target.closest('.header-inner')) setMenu(false);
   });
-  const desktop = window.matchMedia('(min-width: 601px)');
+  const desktop = window.matchMedia('(min-width: 1201px)');
   desktop.addEventListener('change', () => setMenu(false));
 })();
