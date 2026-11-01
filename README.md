@@ -81,3 +81,14 @@ Chrome·Edge에서는 처음 저장할 때 파일 위치를 고르면 그다음�
 - 언어 전환 시 문서·미저장 표시·원문 선택/실행 취소 기록·테마를 유지합니다. 렌더링 창의 내부 실행 취소 기록은 재생성으로 초기화되며, 설정창에도 안내합니다.
 - 온라인/오프라인 md.html에도 4언어 UI와 언어 설정을 포함합니다.
 - [상세 안내](docs/editor-i18n.md). 이 저장소 변경은 EMM 앱의 사본 교체나 배포를 수행하지 않습니다.
+
+
+## Electron 설치형 앱
+
+Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 별도의 `desktop/` 앱으로 빌드합니다. 4언어 UI·오프라인 라이브러리·네이티브 파일 열기/저장을 포함합니다.
+
+- [빌드·설치 안내](desktop/README.md)
+- [Desktop installers 빌드 및 다운로드](https://github.com/okpojung/markdown-editor/actions/workflows/desktop-build.yml)
+- 각 성공한 플랫폼 작업의 artifact에 설치 파일·SHA256SUMS·설치 실행 검사 결과와 의존성 lock을 보관합니다. 기본 보관은 14일입니다.
+- Windows 퍼블리셔 서명과 macOS Developer ID/공증은 미설정입니다(macOS는 ad-hoc). 정식 배포 전 별도 서명 설정이 필요합니다.
+- 기존 홈페이지·웹 편집기·EMM 배포는 변경하지 않습니다.
