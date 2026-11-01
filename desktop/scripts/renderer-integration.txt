@@ -1,0 +1,58 @@
+
+/* Desktop-only native integration. Portable md.html exports keep browser behavior. */
+if (window.desktopAPI) {
+  let openingFile = null;
+  window.desktopAPI.onOpenFile(async meta => {
+    try {
+      if (!askDiscard()) return;
+      const handle = window.desktopMakeHandle(meta);
+      await loadFile(await handle.getFile(), handle);
+      openingFile = meta;
+      if (window.desktopAPI.smokeTest) await runDesktopSmoke(meta);
+    } catch (error) {
+      if (window.desktopAPI.smokeTest) window.desktopAPI.smokeReport({ok:false,error:String(error.message)});
+      else alert(tr('파일을 만들지 못했습니다: ')+error.message);
+    }
+  });
+  window.desktopAPI.onMenuAction(action => {
+    if (action === 'close') return window.close();
+    if (Object.prototype.hasOwnProperty.call(ACTS,action)) ACTS[action]();
+  });
+  window.desktopAPI.ready();
+  if (window.desktopAPI.smokeTest) setTimeout(() => {
+    if (!openingFile) window.desktopAPI.smokeReport({ok:false,error:'Native startup file was not delivered'});
+  },30000);
+}
+async function runDesktopSmoke(meta) {
+  const api=window.desktopAPI, tests={};
+  const initial=md;
+  tests.nativeStartup=initial.includes('Electron native file smoke test');
+  for(const language of ['ko','en','ja','zh']) {
+    setLanguage(language);
+    tests['locale-'+language]=uiLang===language&&document.getElementById('sUiLanguage').value===language&&md===initial;
+  }
+  setMode('md');
+  cm.replaceRange('\nNATIVE-UNSAVED',{line:cm.lastLine(),ch:cm.getLine(cm.lastLine()).length});
+  const expected=cm.getValue(); setLanguage('en');
+  tests.pendingSource=md===expected&&isDirty();
+  for(const modeName of ['md','outline','rendered','split']) { setMode(modeName);tests['mode-'+modeName]=mode===modeName; }
+  const native=await api.readFile(meta.id);
+  tests.nativeRead=native.text.includes('Electron native file smoke test');
+  await api.writeFile(meta.id,native.text+'\nNATIVE-FILE-ROUNDTRIP\n');
+  tests.nativeWrite=(await api.readFile(meta.id)).text.endsWith('NATIVE-FILE-ROUNDTRIP\n');
+  let denied=false;try{await api.readFile('../forbidden');}catch{denied=true;}tests.invalidCapabilityDenied=denied;
+  const preview=await api.createPreview('<!doctype html><h1>Sandbox preview</h1><script>document.title=typeof window.desktopAPI+":"+typeof require;<\/script>');
+  tests.previewProtocol=preview.startsWith('mde-preview://content/');
+  const isolationUrl=await api.createPreview('<!doctype html><script>let parentReadable=false;try{parentReadable=!!parent.document}catch{};parent.postMessage({desktopPreviewTest:true,api:typeof window.desktopAPI,node:typeof require,parentReadable},"*");<\/script>');
+  tests.previewIsolated=await new Promise(resolve=>{
+    const frame=document.createElement('iframe');frame.sandbox='allow-scripts';frame.hidden=true;let timer;
+    const receive=event=>{if(event.source===frame.contentWindow&&event.data?.desktopPreviewTest){clearTimeout(timer);window.removeEventListener('message',receive);frame.remove();resolve(event.data.api==='undefined'&&event.data.node==='undefined'&&!event.data.parentReadable)}};
+    window.addEventListener('message',receive);timer=setTimeout(()=>{window.removeEventListener('message',receive);frame.remove();resolve(false)},6000);frame.src=isolationUrl;document.body.append(frame);
+  });
+  const offline=await buildHtml(true);
+  tests.offlineExport=offline.includes('id="sUiLanguage"')&&!/<script[^>]+src="https:/.test(offline);
+  tests.contextIsolation=typeof require==='undefined'&&typeof process==='undefined';
+  drawSettings();$('#sdlg').hidden=false;
+  await new Promise(r=>setTimeout(r,800));
+  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,uiLanguages:4,nativeFileRoundtrip:true});
+}

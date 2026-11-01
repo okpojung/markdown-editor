@@ -1,0 +1,104 @@
+{
+  "name": "markdown-editor-desktop",
+  "productName": "Markdown Editor",
+  "version": "1.0.0",
+  "description": "Offline Markdown editor with Korean, English, Japanese and Simplified Chinese UI",
+  "author": {
+    "name": "HNG Life",
+    "url": "https://www.hnglife.com"
+  },
+  "license": "MIT",
+  "main": "app/main.cjs",
+  "scripts": {
+    "test": "node --test test/*.test.cjs",
+    "bundle": "node scripts/bundle.cjs",
+    "smoke": "node scripts/smoke.cjs",
+    "dist": "electron-builder --publish never",
+    "verify": "node scripts/verify-install.cjs"
+  },
+  "devDependencies": {
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0",
+    "sharp": "0.35.5",
+    "png-to-ico": "3.0.2"
+  },
+  "build": {
+    "appId": "com.hnglife.markdowneditor",
+    "productName": "Markdown Editor",
+    "asar": true,
+    "files": [
+      "app/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "artifactName": "MarkdownEditor-${version}-${os}-${arch}.${ext}",
+    "forceCodeSigning": false,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": false
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "build/icon.icns",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "notarize": false,
+      "category": "public.app-category.productivity"
+    },
+    "dmg": {
+      "sign": false
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "build/icon.png",
+      "executableName": "markdown-editor",
+      "category": "Office",
+      "maintainer": "HNG Life",
+      "desktop": {
+        "entry": {
+          "Name": "Markdown Editor",
+          "Comment": "Offline Markdown document editor",
+          "Categories": "Office;TextEditor;"
+        }
+      }
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "md",
+          "markdown"
+        ],
+        "name": "Markdown document",
+        "role": "Editor",
+        "mimeType": "text/markdown"
+      }
+    ]
+  }
+}

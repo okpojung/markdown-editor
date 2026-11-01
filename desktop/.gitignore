@@ -1,0 +1,10 @@
+node_modules/
+release/
+proof/
+build/*
+app/editor.html
+app/editor.css
+app/editor.js
+app/asset-map.js
+app/icon.png
+app/vendor/
