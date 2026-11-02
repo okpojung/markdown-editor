@@ -92,3 +92,9 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 - 각 성공한 플랫폼 작업의 artifact에 설치 파일·SHA256SUMS·설치 실행 검사 결과와 의존성 lock을 보관합니다. 기본 보관은 14일입니다.
 - Windows 퍼블리셔 서명과 macOS Developer ID/공증은 미설정입니다(macOS는 ad-hoc). 정식 배포 전 별도 서명 설정이 필요합니다.
 - 기존 홈페이지·웹 편집기·EMM 배포는 변경하지 않습니다.
+
+## 설치 파일 다운로드
+
+[홈페이지 다운로드](https://md-editor.baro.me/#download)에서 운영체제에 맞는 파일을 선택하세요. [GitHub Releases v1.0.0](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.0)에 Windows x64, macOS Apple Silicon/Intel, Linux x64 DEB/AppImage와 SHA256SUMS.txt를 보관합니다. GitHub 로그인은 필요하지 않습니다.
+
+Windows Authenticode 서명은 없고 macOS는 ad-hoc 서명만 있으며 Developer ID 서명·공증은 없습니다. 운영체제 보안 경고가 표시될 수 있습니다. Windows·macOS·Linux DEB는 CI 설치·실행 검사 통과, AppImage는 형식·해시 검증만 수행했습니다.
