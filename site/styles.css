@@ -210,7 +210,7 @@ html:not([lang="ko"]) .download-actions{flex-wrap:wrap}
 .desktop-heading{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:18px}
 .download-section .desktop-heading .eyebrow{font-size:10px;margin-bottom:12px}
 .download-section .desktop-heading h2{font-size:clamp(27px,3vw,39px);letter-spacing:-1px;overflow-wrap:anywhere}
-.desktop-version{display:inline-block;border:1px solid #80939a;border-radius:999px;padding:6px 13px;font-size:12px;white-space:nowrap;margin-top:5px}
+.desktop-version{display:inline-block;border:1px solid #80939a;border-radius:999px;padding:6px 13px;font-size:12px;white-space:normal;max-width:100%;overflow-wrap:anywhere;margin-top:5px}
 .desktop-intro{margin-top:15px;color:#d1dbdb;font-size:14px}
 .desktop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:30px}
 .desktop-card{min-width:0;background:var(--paper);color:var(--ink);border:1px solid #e3e3d8;border-radius:12px;padding:23px 20px;display:flex;flex-direction:column;align-items:stretch}

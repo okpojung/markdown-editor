@@ -91,10 +91,13 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 - [Desktop installers 빌드 및 다운로드](https://github.com/okpojung/markdown-editor/actions/workflows/desktop-build.yml)
 - 각 성공한 플랫폼 작업의 artifact에 설치 파일·SHA256SUMS·설치 실행 검사 결과와 의존성 lock을 보관합니다. 기본 보관은 14일입니다.
 - Windows 퍼블리셔 서명과 macOS Developer ID/공증은 미설정입니다(macOS는 ad-hoc). 정식 배포 전 별도 서명 설정이 필요합니다.
-- 기존 홈페이지·웹 편집기·EMM 배포는 변경하지 않습니다.
+- 데스크톱 앱은 별도 배포이며 웹 편집기와 EMM 앱 사본을 자동 교체하지 않습니다.
 
 ## 설치 파일 다운로드
 
-[홈페이지 다운로드](https://md-editor.baro.me/#download)에서 운영체제에 맞는 파일을 선택하세요. [GitHub Releases v1.0.0](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.0)에 Windows x64, macOS Apple Silicon/Intel, Linux x64 DEB/AppImage와 SHA256SUMS.txt를 보관합니다. GitHub 로그인은 필요하지 않습니다.
+[홈페이지 다운로드](https://md-editor.baro.me/#download)에서 선택합니다.
+- [Windows 1.0.1](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.1): 현재 사용자 / 모든 사용자 설치 선택과 일반 시작 진단을 보완했습니다. [검증한 소스](https://github.com/okpojung/markdown-editor/tree/v1.0.1/desktop), [Windows CI](https://github.com/okpojung/markdown-editor/actions/runs/41829209920).
+- [macOS·Linux 1.0.0](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.0): 기존 파일을 유지합니다.
+- v1.0.1의 SHA256SUMS.txt는 위 Windows 1.0.1 및 macOS·Linux 1.0.0 파일 4개의 체크섬을 함께 제공합니다.
 
-Windows Authenticode 서명은 없고 macOS는 ad-hoc 서명만 있으며 Developer ID 서명·공증은 없습니다. 운영체제 보안 경고가 표시될 수 있습니다. Windows·macOS·Linux DEB는 CI 설치·실행 검사 통과, AppImage는 형식·해시 검증만 수행했습니다.
+Windows는 Authenticode 미서명이고 macOS는 ad-hoc만 적용되어 Developer ID 서명·공증은 없습니다. 운영체제 보안 경고가 표시될 수 있습니다. Windows 1.0.1의 두 설치 방식과 일반 실행·재시작은 CI에서 검증했지만, 별도 표준 계정 로그인 실행과 사용자가 보고한 간헐 오류의 원인은 아직 미확정입니다. Linux AppImage는 형식·해시 검증만 수행했습니다.
