@@ -60,3 +60,18 @@ test('guard precedes all installation side effects and records validation limits
  const coordinator=fs.readFileSync(__dirname+'/../scripts/verify-install.cjs','utf8');
  for(const name of ['build-proof.json','SHA256SUMS.txt','smoke-installed.json','installedSmokePassed','installedSmoke:report','windowsInstallScopes'])check(coordinator.includes(name),name);
 });
+
+test('optional InstallLocation can be derived from the quoted NSIS uninstaller',()=>{
+ for(const scope of ['currentuser','allusers']){
+  const value=fixture(scope),location=value.registrations[0].installLocation;
+  value.registrations[0].installLocation='';
+  value.registrations[0].uninstallString='"'+location+'\\Uninstall Markdown Editor.exe" /'+scope;
+  const observed=validateEvidence(scope,value);
+  check(observed.installLocation===location);check(observed.registration.installLocationSource==='registry-uninstall-command');
+ }
+});
+test('missing InstallLocation never executes or trusts arbitrary uninstall text',()=>{
+ for(const command of ['cmd.exe /c anything','"C:\\Temp\\Uninstall Markdown Editor.exe" /currentuser','"C:\\Program Files\\Markdown Editor\\evil.exe"','"C:\\Program Files\\Markdown Editor\\Uninstall Markdown Editor.exe" & bad']){
+  const value=fixture('allusers');value.registrations[0].installLocation='';value.registrations[0].uninstallString=command;rejects(()=>validateEvidence('allusers',value));
+ }
+});

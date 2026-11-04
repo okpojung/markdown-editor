@@ -6,10 +6,16 @@ function assertCiWindows(platform=process.platform,env=process.env){
 }
 function installArgs(scope){if(!SCOPES.includes(scope))throw new Error('Unknown scope');return ['/S','/'+scope];}
 function within(file,root){if(!file||!root)return false;const rel=path.win32.relative(root,file);return rel!==''&&rel!=='..'&&!rel.startsWith('..\\')&&!path.win32.isAbsolute(rel);}
+function registrationLocation(entry){
+ if(typeof entry.installLocation==='string'&&entry.installLocation.trim())return entry.installLocation;
+ const match=/^"([^"]+\.exe)"(?:\s+\/(?:currentuser|allusers))?\s*$/i.exec(entry.uninstallString||'');
+ if(!match||!path.win32.isAbsolute(match[1])||path.win32.basename(match[1]).toLowerCase()!=='uninstall markdown editor.exe')return '';
+ return path.win32.dirname(match[1]);
+}
 function validateEvidence(scope,state){
  const hive=scope==='allusers'?'HKLM':'HKCU',entries=state.registrations.filter(e=>e.hive===hive);
  if(entries.length!==1||state.registrations.some(e=>e.hive!==hive))throw new Error('Uninstall registration scope/count mismatch');
- const entry=entries[0],roots=scope==='allusers'?state.programFiles:[state.localPrograms];
+ const rawEntry=entries[0],entry={...rawEntry,installLocation:registrationLocation(rawEntry),installLocationSource:rawEntry.installLocation?'registry-install-location':'registry-uninstall-command'},roots=scope==='allusers'?state.programFiles:[state.localPrograms];
  if(!entry.uninstallString||!roots.some(root=>within(entry.installLocation,root)))throw new Error('Unexpected default location or missing uninstall command');
  const target=path.win32.join(entry.installLocation,'Markdown Editor.exe').toLowerCase();
  const links=state.shortcuts.filter(e=>path.win32.normalize(e.target).toLowerCase()===target),expected=scope==='allusers'?'common':'user';
@@ -131,7 +137,7 @@ async function verifyWindowsInstall({root,installer,runSmoke,normalStartup}){
   if(!proof.ok)throw new Error('Windows scope verification incomplete');return {...last,scopes:proof};
  }finally{await save();}
 }
-module.exports={assertCiWindows,installArgs,within,validateEvidence,verifyWindowsInstall};
+module.exports={assertCiWindows,installArgs,within,registrationLocation,validateEvidence,verifyWindowsInstall};
 if(require.main===module){
  (async()=>{assertCiWindows();const root=path.resolve(__dirname,'..'),names=(await fs.readdir(path.join(root,'release'))).filter(name=>name.endsWith('.exe'));if(names.length!==1)throw new Error('Expected one NSIS installer');await verifyWindowsInstall({root,installer:path.join(root,'release',names[0]),runSmoke:require('./smoke.cjs').run});})().catch(()=>{console.error('Windows verification failed; inspect proof/windows-install-scopes.json');process.exitCode=1;});
 }
