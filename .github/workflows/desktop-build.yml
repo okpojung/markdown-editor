@@ -5,6 +5,12 @@ on:
       - 'desktop/**'
       - '.github/workflows/desktop-build.yml'
   workflow_dispatch:
+    inputs:
+      platform:
+        description: "Build platforms"
+        type: choice
+        default: all
+        options: [all, windows]
 permissions:
   contents: read
 concurrency:
@@ -33,23 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: windows-2025
-            arch: x64
-            platform: win
-            name: windows-x64
-          - os: macos-15-intel
-            arch: x64
-            platform: mac
-            name: mac-intel-x64
-          - os: macos-15
-            arch: arm64
-            platform: mac
-            name: mac-apple-arm64
-          - os: ubuntu-24.04
-            arch: x64
-            platform: linux
-            name: linux-x64
+        include: ${{ fromJSON((startsWith(github.ref, 'refs/heads/fix/windows-') || (github.event_name == 'workflow_dispatch' && inputs.platform == 'windows')) && '[{"os":"windows-2025","arch":"x64","platform":"win","name":"windows-x64"}]' || '[{"os":"windows-2025","arch":"x64","platform":"win","name":"windows-x64"},{"os":"macos-15-intel","arch":"x64","platform":"mac","name":"mac-intel-x64"},{"os":"macos-15","arch":"arm64","platform":"mac","name":"mac-apple-arm64"},{"os":"ubuntu-24.04","arch":"x64","platform":"linux","name":"linux-x64"}]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
     defaults:
