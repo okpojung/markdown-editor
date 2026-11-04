@@ -24,9 +24,14 @@ function execute(file,args,timeout=180000,verbatim=false){return new Promise((re
  child.stdout.on('data',data=>{if(output.length<2097152)output+=data;else overflow=true;});
  child.stderr.on('data',()=>{}); // Never print raw errors, command arguments or environment.
  child.on('error',()=>finish(new Error('Windows verification subprocess failed to start')));
- child.on('exit',code=>finish(code===0&&!overflow?null:new Error('Windows verification subprocess failed (exit '+code+')')));
+ child.on('exit',code=>{
+  if(code===0&&!overflow){finish(null);return;}
+  const error=new Error('Windows verification subprocess failed (exit '+code+')');
+  try{const details=JSON.parse(output);if(details.ciError==='PS_INSPECTION_FAILED')error.ciDiagnostic={category:/^[a-zA-Z]{1,40}$/.test(details.category)?details.category:'Unknown',hresult:Number.isInteger(details.hresult)?details.hresult:null};}catch{}
+  finish(error);
+ });
 });}
-async function powershell(script){return execute('powershell.exe',['-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',Buffer.from("$ErrorActionPreference='Stop'; [Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); "+script,'utf16le').toString('base64')]);}
+async function powershell(script){return execute('powershell.exe',['-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',Buffer.from("$ErrorActionPreference='Stop'; [Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); try {\n"+script+"\n} catch { [pscustomobject]@{ciError='PS_INSPECTION_FAILED';category=[string]$_.CategoryInfo.Category;hresult=$_.Exception.HResult} | ConvertTo-Json -Compress; exit 1 }",'utf16le').toString('base64')]);}
 async function inspect(){return JSON.parse(await powershell(String.raw`
 $registrations=@();
 foreach($hive in @('HKCU','HKLM')) { foreach($view in @('Registry64','Registry32')) {
@@ -49,7 +54,7 @@ foreach($hive in @('HKCU','HKLM')) { foreach($view in @('Registry64','Registry32
 $shell=New-Object -ComObject WScript.Shell;$shortcuts=@();
 foreach($kind in @('common','user')) {
  $folder=if($kind -eq 'common'){[Environment]::GetFolderPath('CommonPrograms')}else{[Environment]::GetFolderPath('Programs')};
- if(Test-Path -LiteralPath $folder) {foreach($file in Get-ChildItem -LiteralPath $folder -Filter '*.lnk' -Recurse -File) {
+ if(Test-Path -LiteralPath $folder) {foreach($file in Get-ChildItem -LiteralPath $folder -Filter 'Markdown Editor.lnk' -Recurse -File) {
   $shortcut=$shell.CreateShortcut($file.FullName);
   if($file.BaseName -eq 'Markdown Editor' -or [IO.Path]::GetFileName($shortcut.TargetPath) -eq 'Markdown Editor.exe') {
    $shortcuts += [pscustomobject]@{scope=$kind;path=$file.FullName;target=$shortcut.TargetPath}
@@ -77,12 +82,17 @@ async function verifyWindowsInstall({root,installer,runSmoke,normalStartup}){
   for(const scope of SCOPES){
    const result={scope,stage:'install',installerArguments:installArgs(scope),status:'running',smokePassed:false,uninstall:{attempted:false,passed:false}};proof.scopes.push(result);await save();let location;
    try {
-    await execute(installer,installArgs(scope));result.stage='registry-and-start-menu';const state=await inspect();
-    const roots=scope==='allusers'?state.programFiles:[state.localPrograms];
-    const entries=state.registrations.filter(e=>e.hive===(scope==='allusers'?'HKLM':'HKCU')&&roots.some(root=>within(e.installLocation,root)));
-    if(entries.length===1)location=entries[0].installLocation;
-    const evidence=validateEvidence(scope,state);location=evidence.installLocation;
-    Object.assign(result,evidence);const binary=path.join(location,'Markdown Editor.exe');
+    await execute(installer,installArgs(scope));result.stage='registry-and-start-menu';
+    let evidence,lastValidation;const installDeadline=Date.now()+15000;result.validationAttempts=0;
+    do {
+     result.validationAttempts++;
+     try{const state=await inspect();result.observed=state;evidence=validateEvidence(scope,state);await save();break;}
+     catch(error){lastValidation=error;if(error.ciDiagnostic)result.inspectionDiagnostic=error.ciDiagnostic;}
+     await save();if(Date.now()<installDeadline)await new Promise(resolve=>setTimeout(resolve,500));
+    }while(Date.now()<installDeadline);
+    if(!evidence)throw lastValidation||new Error('Install validation incomplete');
+    location=evidence.installLocation;
+    Object.assign(result,evidence);result.stage='installed-binary';const binary=path.join(location,'Markdown Editor.exe');
     if(!await exists(binary))throw new Error('Installed binary missing');
     result.stage='installed-smoke';
     const output=path.join(os.tmpdir(),'mde-installed-win32-'+scope+'-'+Date.now()+'.json'),report=await runSmoke(binary,[],output);
@@ -92,7 +102,11 @@ async function verifyWindowsInstall({root,installer,runSmoke,normalStartup}){
     await fs.copyFile(output.replace(/\.json$/,'.png'),path.join(proofDir,'smoke-installed-'+scope+'.png')).catch(()=>{});
     if(normalStartup){result.stage='normal-startup';result.normalStartup=await normalStartup(binary,scope);if(result.normalStartup.ok!==true)throw new Error('Normal startup did not pass');}
     last={report,output};result.status='passed';result.stage='verified';
-   }catch{result.status='failed';throw new Error('Windows '+scope+' verification failed; inspect windows-install-scopes.json');}
+   }catch(error){
+    result.status='failed';
+    result.failureCode=error.ciDiagnostic?'WINDOWS_INSPECTION_FAILED':({'Uninstall registration scope/count mismatch':'REGISTRY_SCOPE_MISMATCH','Unexpected default location or missing uninstall command':'INSTALL_LOCATION_MISMATCH','Start menu scope/target mismatch':'SHORTCUT_SCOPE_MISMATCH','Installed binary missing':'BINARY_MISSING','Installed smoke failed':'SMOKE_FAILED','Normal startup did not pass':'NORMAL_STARTUP_FAILED'})[error.message]||'CHECK_FAILED';
+    throw new Error('Windows '+scope+' verification failed; inspect windows-install-scopes.json');
+   }
    finally{
     result.uninstall.attempted=true;
     try{
