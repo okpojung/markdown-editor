@@ -26,6 +26,9 @@ async function runRenderedTailRegression() {
       const end = doc.content.size - 1, marker = "AFTER-"+language+"-"+mode+"-"+fixture.id;
       m.ed.focus(); m.ed.setSelection(end,end);
       check(view.state.selection.$from.parent.type.name === "paragraph", fixture.id+" cursor not outside");
+      // Hidden Electron smoke windows do not receive OS focus. Notify the same
+      // editor focus event before synthetic API typing; browser UI tests use real focus.
+      if (window.desktopAPI?.smokeTest) m.ed.eventEmitter.emit("focus", "wysiwyg");
       await pause(30);
       m.ed.insertText(marker);
       await wait(() => m.markdown.includes(marker), fixture.id+" source sync");
@@ -47,7 +50,7 @@ async function runRenderedTailRegression() {
   for(let i=0;i<5;i++) m.ed.setSelection(m.ed.wwEditor.view.state.doc.content.size-1);
   check(m.ed.wwEditor.view.state.doc.childCount === count,"duplicate helper paragraphs");
   await pause(600);
-  m.ed.focus();m.ed.setSelection(m.ed.wwEditor.view.state.doc.content.size-1);await pause(30);m.ed.insertText("UNDOTAIL");
+  m.ed.focus();m.ed.setSelection(m.ed.wwEditor.view.state.doc.content.size-1);if(window.desktopAPI?.smokeTest)m.ed.eventEmitter.emit("focus","wysiwyg");await pause(30);m.ed.insertText("UNDOTAIL");
   await wait(()=>m.markdown.includes("UNDOTAIL"),"undo seed");
   m.ed.exec("undo");
   await wait(()=>!m.markdown.includes("UNDOTAIL"),"undo");
