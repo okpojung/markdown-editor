@@ -18,6 +18,12 @@ async function runEmbedHostRegression(frameId = "embedEditor") {
     check(w.document.title === "회의록.md", "config name and loaded baseline");
     check(w.document.getElementById("saveBtn").textContent === "EMM에 저장", "config save label");
     check(w.getComputedStyle(w.document.getElementById("toc")).display === "none", "iframe TOC initially collapsed");
+    w.MDE.setMode("split"); w.MDE.ed.blur(); w.MDE.cm.focus();
+    w.MDE.cm.setValue("source saved immediately"); w.document.getElementById("saveBtn").click(); await pause(30);
+    check(w.MDE.ed.getMarkdown().trim() === "source saved immediately", "source immediate save updates rendered pane");
+    send({type:"mde:saved"}); await pause(30);
+    w.MDE.cm.setValue("source acknowledged immediately"); send({type:"mde:saved",markdown:"source acknowledged immediately"}); await pause(30);
+    check(w.MDE.ed.getMarkdown().trim() === "source acknowledged immediately", "source acknowledgement flush updates rendered pane");
     w.MDE.setMarkdown("snapshot A"); w.document.getElementById("saveBtn").click(); await pause(30);
     check(saves.at(-1)?.markdown === "snapshot A" && dirty(), "save forwards exact Markdown but waits for acknowledgement");
     w.MDE.setMarkdown("newer edit B"); send({type:"mde:saved"}); await pause(30);

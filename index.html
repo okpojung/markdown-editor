@@ -1926,7 +1926,7 @@ function flushPendingEdits() {
     let next = fromWw(normalizeWw(ed.getMarkdown()));
     if (md.endsWith("\n") && !next.endsWith("\n")) next += "\n";
     md = next; pushToSrc(); afterChange();
-  } else if (source) { md = cm.getValue(); afterChange(); }
+  } else if (source) { md = cm.getValue(); pushToWw(); afterChange(); }
 }
 function frameSave() {
   flushPendingEdits();
