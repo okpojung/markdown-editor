@@ -702,11 +702,25 @@ const cm = CodeMirror($("#src"), {
   value: md, mode: MD_MODE, lineNumbers: sourceLn, lineWrapping: !!S.wrap, tabSize: 2, indentUnit: 2,
   extraKeys: { "Ctrl-B": () => fmt("bold"), "Ctrl-I": () => fmt("italic"), "Ctrl-U": () => fmt("underline"), "Ctrl-K": () => fmt("link"), "Cmd-B": () => fmt("bold"), "Cmd-I": () => fmt("italic"), "Cmd-U": () => fmt("underline"), "Cmd-K": () => fmt("link") },
 });
+// Keep a real editable paragraph after terminal tables, code fences and previews.
+// This is a ProseMirror transaction, not a DOM-only placeholder or saved marker.
+function renderedTailPlugin({ pmState: { Plugin } }) {
+  return { wysiwygPlugins: [() => new Plugin({
+    appendTransaction(transactions, oldState, state) {
+      if (!transactions.some(transaction => transaction.docChanged)) return null;
+      const last = state.doc.lastChild;
+      if (!last || !["table", "codeBlock", "customBlock"].includes(last.type.name)) return null;
+      return state.tr.insert(state.doc.content.size, state.schema.nodes.paragraph.create())
+        .setMeta("addToHistory", false);
+    },
+  })] };
+}
 function createEditor() { return new toastui.Editor({
   el: $("#ww"), height: "100%", initialEditType: "wysiwyg", previewStyle: "tab",
   hideModeSwitch: true, usageStatistics: false, autofocus: false, language: toastLocale(), initialValue: toWw(md),
   linkAttributes: { target: "_blank", rel: "noopener" },
   toolbarItems: [], // all editing buttons live in the top toolbar
+  plugins: [renderedTailPlugin],
   customHTMLRenderer: { htmlInline: {
     u: (node, { entering }) => (entering ? { type: "openTag", tagName: "u", attributes: node.attrs } : { type: "closeTag", tagName: "u" }),
     mark: (node, { entering }) => (entering ? { type: "openTag", tagName: "mark", attributes: node.attrs } : { type: "closeTag", tagName: "mark" }),
