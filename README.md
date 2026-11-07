@@ -54,8 +54,7 @@ Chrome·Edge에서는 처음 저장할 때 파일 위치를 고르면 그다음�
 
 ## 임베드(iframe)
 
-`postMessage`로 문서를 주고받습니다: `mde:set`, `mde:get` → `mde:markdown`, `mde:mode`, 변경 시 `mde:change`, 닫기 시 `mde:close`.
-실서비스에 붙일 때는 허용할 출처(origin)만 받도록 바꿔야 합니다.
+직접 부모의 `mde:config {name,saveLabel}`로 파일 이름과 저장 단추를 설정합니다. 그 모드의 저장·Ctrl/Cmd+S는 `mde:save {markdown}`를 부모에게 보내며, 실제 저장 성공 후 `mde:saved` 응답으로 저장 상태를 확정합니다. 기존 set/get/mode/change/close API는 유지합니다. iframe은 기본 목차를 접고 파일·저장·닫기를 첫 줄에 배치합니다. [연동 계약·저장 동시성·보안 및 검사](docs/iframe-embed.md)를 참고하세요.
 
 ## 라이선스
 
