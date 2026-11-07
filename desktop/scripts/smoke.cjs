@@ -4,6 +4,8 @@ const path=require('node:path');
 const os=require('node:os');
 const cp=require('node:child_process');
 const root=path.resolve(__dirname,'..');
+const {preserveSmokeEvidence}=require('./smoke-evidence.cjs');
+const {hasCompleteRenderedTail}=require('./check-rendered-tail.cjs');
 async function run(executable,prefix,output) {
   const dir=await fs.mkdtemp(path.join(os.tmpdir(),'markdown-editor-smoke-'));
   const fixture=path.join(dir,'fixture.md');
@@ -11,13 +13,26 @@ async function run(executable,prefix,output) {
   const args=[...prefix,'--smoke-test','--smoke-output='+output,fixture];
   const command=process.platform==='linux'?'xvfb-run':executable;
   const commandArgs=process.platform==='linux'?['-a',executable,'--no-sandbox',...args]:args;
-  await new Promise((resolve,reject)=>{
-    const child=cp.spawn(command,commandArgs,{stdio:'inherit',env:{...process.env,ELECTRON_RUN_AS_NODE:undefined}});
-    const timer=setTimeout(()=>{child.kill('SIGKILL');reject(new Error('Electron smoke timeout'));},100000);
-    child.on('error',reject);child.on('exit',code=>{clearTimeout(timer);code===0?resolve():reject(new Error('Electron smoke exit '+code));});
-  });
-  const report=JSON.parse(await fs.readFile(output,'utf8'));
-  if(!report.ok)throw new Error('Smoke reported failure: '+JSON.stringify(report));
+  let childFailure=null;
+  try {
+    await new Promise((resolve,reject)=>{
+      const child=cp.spawn(command,commandArgs,{stdio:'inherit',env:{...process.env,ELECTRON_RUN_AS_NODE:undefined}});
+      let settled=false;
+      const finish=(error)=>{if(settled)return;settled=true;clearTimeout(timer);error?reject(error):resolve();};
+      const timer=setTimeout(()=>{
+        if(child.pid&&child.exitCode===null){if(process.platform==='win32')cp.execFile('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true},()=>{});else child.kill('SIGKILL');}
+        finish(new Error('Electron smoke timeout'));
+      },100000);
+      child.on('error',()=>finish(new Error('Electron smoke launch failed')));
+      child.on('exit',code=>finish(code===0?null:new Error('Electron smoke exit '+code)));
+    });
+  } catch(error) {childFailure=error;}
+  let report=null;try{report=JSON.parse(await fs.readFile(output,'utf8'));}catch{}
+  if(childFailure||!report||report.ok!==true||!hasCompleteRenderedTail(report)){
+    const evidence=await preserveSmokeEvidence(output,path.basename(output,'.json'));
+    const failure=new Error((childFailure?.message||'Smoke reported failure')+'; failure report preserved: '+evidence.report);
+    failure.report=report;throw failure;
+  }
   return report;
 }
 async function main(){

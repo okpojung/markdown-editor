@@ -101,3 +101,6 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 - v1.0.1의 SHA256SUMS.txt는 위 Windows 1.0.1 및 macOS·Linux 1.0.0 파일 4개의 체크섬을 함께 제공합니다.
 
 Windows는 Authenticode 미서명이고 macOS는 ad-hoc만 적용되어 Developer ID 서명·공증은 없습니다. 운영체제 보안 경고가 표시될 수 있습니다. Windows 1.0.1의 두 설치 방식과 일반 실행·재시작은 CI에서 검증했지만, 별도 표준 계정 로그인 실행과 사용자가 보고한 간헐 오류의 원인은 아직 미확정입니다. Linux AppImage는 형식·해시 검증만 수행했습니다.
+
+## 문서 끝 표·코드블록 커서 수정
+표·일반 코드블록·Mermaid/HTML 미리보기로 끝나는 문서에서 블록 아래에 커서를 놓고 계속 입력할 수 있습니다. 기존 마지막 문단은 중복 추가하지 않습니다. 공통 원본 index.html을 웹·데스크톱 빌드에 사용하며 tests/rendered-tail.browser.js로 4언어·렌더링/분할·원문 동기화·Undo/Redo 34개 합성 검사를 제공합니다. EMM 사본은 앱 담당이 동일 커밋을 반영해야 합니다.

@@ -24,7 +24,8 @@ function replaceOnce(text, before, after) {
     await fs.writeFile(path.join(appDir,asset.url),bytes);
   }
   await fs.writeFile(path.join(appDir,'vendor/manifest.json'),JSON.stringify(manifest,null,2));
-  let html = await fs.readFile(path.join(root,'source/editor.html'),'utf8');
+  const editorSource = path.join(root,'..','index.html');
+  let html = await fs.readFile(editorSource,'utf8');
   const css = html.match(/<style id="appStyle">([\s\S]*?)<\/style>/)[1];
   const scriptMatch = html.match(/<script id="appMain">([\s\S]*?)<\/script>/);
   let js = scriptMatch[1];
@@ -38,6 +39,7 @@ function replaceOnce(text, before, after) {
   const previewLine = js.split('\n').find(l => l.includes('f.srcdoc = code +'));
   if (!previewLine) throw new Error('Missing HTML preview integration point');
   js = replaceOnce(js,previewLine,previewLine.replace('f.srcdoc =','const previewDocument =')+'\n    if (window.desktopAPI) window.desktopAPI.createPreview(previewDocument).then(url => { if (f.isConnected) f.src=url; }).catch(() => { f.title="Preview unavailable"; }); else f.srcdoc=previewDocument;');
+  js += '\n'+await fs.readFile(path.join(root,'../tests/rendered-tail.browser.js'),'utf8');
   js += '\n'+await fs.readFile(path.join(root,'scripts/renderer-integration.txt'),'utf8');
   new Function(js);
   const assetMap = Object.fromEntries(manifest.assets.map(a => [a.sourceUrl,a.id]));
@@ -74,5 +76,5 @@ function replaceOnce(text, before, after) {
     for (const size of [16,32,128,256,512]) for (const scale of [1,2]) await sharp(png).resize(size*scale,size*scale).png().toFile(path.join(set,'icon_'+size+'x'+size+(scale===2?'@2x':'')+'.png'));
     cp.execFileSync('iconutil',['-c','icns',set,'-o',path.join(root,'build/icon.icns')]);
   }
-  console.log(JSON.stringify({ok:true,sourceSha:sha(await fs.readFile(path.join(root,'source/editor.html'))),assets:manifest.assets.length,uiLanguages:4}));
+  console.log(JSON.stringify({ok:true,sourceSha:sha(await fs.readFile(editorSource)),assets:manifest.assets.length,uiLanguages:4}));
 })().catch(e=>{ console.error(e.message); process.exit(1); });

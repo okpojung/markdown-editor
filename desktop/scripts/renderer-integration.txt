@@ -52,7 +52,9 @@ async function runDesktopSmoke(meta) {
   const offline=await buildHtml(true);
   tests.offlineExport=offline.includes('id="sUiLanguage"')&&!/<script[^>]+src="https:/.test(offline);
   tests.contextIsolation=typeof require==='undefined'&&typeof process==='undefined';
+  const renderedTailBrowser=await runRenderedTailRegression();
+  tests.renderedTailBrowser=renderedTailBrowser?.passed===true;
   drawSettings();$('#sdlg').hidden=false;
   await new Promise(r=>setTimeout(r,800));
-  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,uiLanguages:4,nativeFileRoundtrip:true});
+  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,renderedTailBrowser,uiLanguages:4,nativeFileRoundtrip:true});
 }
