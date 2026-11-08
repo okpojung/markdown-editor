@@ -54,7 +54,9 @@ async function runDesktopSmoke(meta) {
   tests.contextIsolation=typeof require==='undefined'&&typeof process==='undefined';
   const renderedTailBrowser=await runRenderedTailRegression();
   tests.renderedTailBrowser=renderedTailBrowser?.passed===true;
+  const tableGridBrowser=await runTableGridRegression();
+  tests.tableGridBrowser=tableGridBrowser?.passed===true;
   drawSettings();$('#sdlg').hidden=false;
   await new Promise(r=>setTimeout(r,800));
-  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,renderedTailBrowser,uiLanguages:4,nativeFileRoundtrip:true});
+  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,renderedTailBrowser,tableGridBrowser,uiLanguages:4,nativeFileRoundtrip:true});
 }
