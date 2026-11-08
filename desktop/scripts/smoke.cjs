@@ -6,6 +6,7 @@ const cp=require('node:child_process');
 const root=path.resolve(__dirname,'..');
 const {preserveSmokeEvidence}=require('./smoke-evidence.cjs');
 const {hasCompleteRenderedTail}=require('./check-rendered-tail.cjs');
+const {hasCompleteTableGrid}=require('./check-table-grid.cjs');
 async function run(executable,prefix,output) {
   const dir=await fs.mkdtemp(path.join(os.tmpdir(),'markdown-editor-smoke-'));
   const fixture=path.join(dir,'fixture.md');
@@ -28,7 +29,7 @@ async function run(executable,prefix,output) {
     });
   } catch(error) {childFailure=error;}
   let report=null;try{report=JSON.parse(await fs.readFile(output,'utf8'));}catch{}
-  if(childFailure||!report||report.ok!==true||!hasCompleteRenderedTail(report)){
+  if(childFailure||!report||report.ok!==true||!hasCompleteRenderedTail(report)||!hasCompleteTableGrid(report)){
     const evidence=await preserveSmokeEvidence(output,path.basename(output,'.json'));
     const failure=new Error((childFailure?.message||'Smoke reported failure')+'; failure report preserved: '+evidence.report);
     failure.report=report;throw failure;

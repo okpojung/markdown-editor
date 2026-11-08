@@ -14,7 +14,7 @@ function fixture(scope){const all=scope==='allusers',location=all?'C:\\Program F
 test('assisted NSIS supports current-user and all-user choices without elevating app',()=>{
  const nsis=pkg.build.nsis;
  for(const [key,value] of Object.entries({oneClick:false,perMachine:false,allowElevation:true,selectPerMachineByDefault:true,packElevateHelper:true}))check(nsis[key]===value,'NSIS '+key);
- check(pkg.version==='1.0.2');check(pkg.build.win.requestedExecutionLevel==='asInvoker');check(nsis.runAfterFinish===false);
+ check(pkg.version==='1.0.3');check(pkg.build.win.requestedExecutionLevel==='asInvoker');check(nsis.runAfterFinish===false);
 });
 test('CI guard rejects local Windows, other OS and incomplete CI environment',()=>{
  const valid={GITHUB_ACTIONS:'true',GITHUB_RUN_ID:'123',RUNNER_TEMP:'C:\\Temp'};

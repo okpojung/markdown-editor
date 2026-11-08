@@ -6,6 +6,7 @@ on:
       - 'tests/**'
       - 'desktop/**'
       - '.github/workflows/desktop-build.yml'
+      - '.github/workflows/release-draft.yml'
   workflow_dispatch:
     inputs:
       platform:

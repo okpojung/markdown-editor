@@ -1,0 +1,81 @@
+name: Prepare desktop release draft
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Successful full desktop-build run ID
+        required: true
+        type: string
+      source_sha:
+        description: Exact source commit, tree must equal this main revision
+        required: true
+        type: string
+      version:
+        description: Installer version, e.g. 1.0.3
+        required: true
+        type: string
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: desktop-release-draft
+  cancel-in-progress: false
+jobs:
+  draft:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BUILD_RUN_ID: ${{ inputs.build_run_id }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      VERSION: ${{ inputs.version }}
+      GITHUB_TOKEN: ${{ github.token }}
+      CHECKOUT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.CHECKOUT_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: Offline validator unit tests
+        run: node --test desktop/test/release-draft.test.cjs
+      - name: Verify trusted tree, build, jobs, artifacts and release absence
+        run: node desktop/scripts/release-draft.cjs preflight
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: markdown-editor-windows-x64
+          path: ${{ runner.temp }}/markdown-release-input/markdown-editor-windows-x64
+          run-id: ${{ env.BUILD_RUN_ID }}
+          github-token: ${{ env.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: markdown-editor-mac-intel-x64
+          path: ${{ runner.temp }}/markdown-release-input/markdown-editor-mac-intel-x64
+          run-id: ${{ env.BUILD_RUN_ID }}
+          github-token: ${{ env.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: markdown-editor-mac-apple-arm64
+          path: ${{ runner.temp }}/markdown-release-input/markdown-editor-mac-apple-arm64
+          run-id: ${{ env.BUILD_RUN_ID }}
+          github-token: ${{ env.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: markdown-editor-linux-x64
+          path: ${{ runner.temp }}/markdown-release-input/markdown-editor-linux-x64
+          run-id: ${{ env.BUILD_RUN_ID }}
+          github-token: ${{ env.GITHUB_TOKEN }}
+      - name: Verify proofs and installer hashes, create draft only
+        run: node desktop/scripts/release-draft.cjs publish
+      - name: Preserve release verification evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-draft-proof
+          path: |
+            ${{ runner.temp }}/markdown-release-draft/release-proof.json
+            ${{ runner.temp }}/markdown-release-draft/SHA256SUMS.txt
+          if-no-files-found: ignore
+          retention-days: 14
