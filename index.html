@@ -577,6 +577,7 @@ let lastFocus = "src";
 let wwFocused = false;
 let wwStale = false;
 let wwUserOp = false;
+let wwSyncing = false;
 let fileName = EMM ? EMM.name : EMBEDDED ? EMB.dataset.name : "document.md";
 const DOC = { kind: EMM ? "emm" : EMBEDDED ? (PAGE_OFFLINE ? "offline" : "online") : "md", handle: null, saved: md, fileBound: EMBEDDED || !!EMM };
 function updateSaveControls() {
@@ -813,7 +814,7 @@ ed.on("focus", () => { lastFocus = "ww"; wwFocused = true; updStatus(); });
 
 ed.on("blur", () => { wwSel = ed.getSelection(); wwFocused = false; });
 ed.on("change", () => {
-  if (!wwFocused && !wwUserOp) return; // ignore changes caused by setMarkdown
+  if (wwSyncing || (!wwFocused && !wwUserOp)) return; // ignore model-to-view setMarkdown
   latestEditSource = "ww";
   clearTimeout(tWw);
   tWw = setTimeout(() => {
@@ -847,7 +848,9 @@ function normalizeWw(text) {
 
 function pushToWw() {
   if (!wwVisible()) { wwStale = true; return; }
-  ed.setMarkdown(toWw(md), false);
+  const syncing = wwSyncing; wwSyncing = true;
+  try { ed.setMarkdown(toWw(md), false); }
+  finally { wwSyncing = syncing; }
   schedulePreviews();
   wwStale = false;
 }

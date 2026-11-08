@@ -18,6 +18,11 @@ async function runEmbedHostRegression(frameId = "embedEditor") {
     check(w.document.title === "회의록.md", "config name and loaded baseline");
     check(w.document.getElementById("saveBtn").textContent === "EMM에 저장", "config save label");
     check(w.getComputedStyle(w.document.getElementById("toc")).display === "none", "iframe TOC initially collapsed");
+    w.MDE.setMode("rendered"); w.MDE.ed.eventEmitter.emit("focus", "wysiwyg");
+    const loadedTable = "| A | B |\n| --- | --- |\n| 1 | 2 |";
+    send({type:"mde:set",markdown:loadedTable}); await pause(650);
+    check(!dirty() && w.MDE.markdown === loadedTable, "parent reload while focused remains clean and exact");
+    w.MDE.ed.blur();
     w.MDE.setMode("split"); w.MDE.ed.blur(); w.MDE.cm.focus();
     w.MDE.cm.setValue("source saved immediately"); w.document.getElementById("saveBtn").click(); await pause(30);
     check(w.MDE.ed.getMarkdown().trim() === "source saved immediately", "source immediate save updates rendered pane");
