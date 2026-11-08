@@ -94,9 +94,9 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 
 ## 설치 파일 다운로드
 
-[홈페이지 다운로드](https://md-editor.baro.me/#download)와 [GitHub Release v1.0.2](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.2)에서 Windows x64, macOS Intel/Apple Silicon, Linux x64 DEB/AppImage를 선택합니다. SHA256SUMS.txt는 설치 파일 5종을 검증합니다.
+[홈페이지 다운로드](https://md-editor.baro.me/?lang=ko#download)와 [GitHub Release v1.0.3](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.3)에서 Windows x64, macOS Intel/Apple Silicon, Linux x64 DEB/AppImage를 선택합니다. SHA256SUMS.txt는 설치 파일 5종을 검증합니다.
 
-[검증한 빌드 소스](https://github.com/okpojung/markdown-editor/tree/v1.0.2)와 [4플랫폼 CI](https://github.com/okpojung/markdown-editor/actions/runs/42391991962). 각 설치 앱의 34개 편집 회귀 검사를 통과했습니다. Windows는 두 설치 범위와 일반 실행·재시작도 검사했으나 별도 표준 계정 실행은 미검증입니다. Windows Authenticode 및 macOS Developer ID 서명·공증은 미완료여서 보안 경고가 표시될 수 있습니다. AppImage는 형식·해시 검사만 수행했습니다.
+[검증한 빌드 소스](https://github.com/okpojung/markdown-editor/tree/984ae333bb37482e9ed745eab872fd0f66ebeaf7)와 [4플랫폼 CI](https://github.com/okpojung/markdown-editor/actions/runs/42436179534). 각 설치 앱에서 표 격자 52개·기존 표/코드 34개 회귀 검사를 통과했습니다. [릴리스 준비 검증](https://github.com/okpojung/markdown-editor/actions/runs/42436840895)은 main과 전체 tree 일치 및 5파일의 바이트 수·SHA-256을 확인했습니다. Windows 별도 표준 계정 실행은 미검증이며 Windows Authenticode와 macOS Developer ID 서명·공증도 미완료입니다. AppImage의 FUSE 실구동은 미검증입니다. EMM 운영 사본 반영은 별도 확인해야 합니다.
 
 ## 문서 끝 표·코드블록 커서 수정
 표·일반 코드블록·Mermaid/HTML 미리보기로 끝나는 문서에서 블록 아래에 커서를 놓고 계속 입력할 수 있습니다. 기존 마지막 문단은 중복 추가하지 않습니다. 공통 원본 index.html을 웹·데스크톱 빌드에 사용하며 tests/rendered-tail.browser.js로 4언어·렌더링/분할·원문 동기화·Undo/Redo 34개 합성 검사를 제공합니다. EMM 사본은 앱 담당이 동일 커밋을 반영해야 합니다.
