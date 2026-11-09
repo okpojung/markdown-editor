@@ -55,7 +55,7 @@ async function runSplitScrollRegression() {
     m.setMarkdown(longText);m.setMode('split');await pause(180);
     const markerPos=marker=>{let p=null;m.ed.wwEditor.view.state.doc.descendants((n,at)=>{if(n.isText&&n.text.includes(marker))p=at+n.text.indexOf(marker)+2;});return p;};
     const visibleRendered=marker=>{const y=m.ed.wwEditor.view.coordsAtPos(markerPos(marker)).top-rendered().getBoundingClientRect().top;return y>=-2&&y<rendered().clientHeight-10;};
-    m.cm.focus();m.cm.setCursor({line:0,ch:longText.indexOf('FORWARD_SENTINEL')+2});await settled(()=>visibleRendered('FORWARD_SENTINEL'));
+    m.cm.focus();m.cm.setCursor({line:0,ch:0});m.cm.setCursor({line:0,ch:longText.indexOf('FORWARD_SENTINEL')+2});await settled(()=>visibleRendered('FORWARD_SENTINEL'));
     check(visibleRendered('FORWARD_SENTINEL'),'long link and EMM syntax source text follows visible text',language);
     m.ed.focus();m.ed.setSelection(markerPos('REVERSE_SENTINEL'));rendered().dispatchEvent(new KeyboardEvent('keyup',{key:'ArrowRight',bubbles:true}));
     const visibleSource=()=>{const y=m.cm.charCoords({line:0,ch:longText.indexOf('REVERSE_SENTINEL')+2},'window').top-m.cm.getWrapperElement().getBoundingClientRect().top;return y>=-2&&y<m.cm.getWrapperElement().clientHeight-10;};

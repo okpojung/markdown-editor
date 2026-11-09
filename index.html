@@ -1019,7 +1019,10 @@ function bindSplitRenderedEvents() {
   if(typeof ResizeObserver!=="undefined"){splitFollow.observer=new ResizeObserver(()=>requestSplitFollow(splitFollow.last));splitFollow.observer.observe(view.dom);}
 }
 cm.on("scroll",()=>splitScrollChanged("src"));
-cm.on("focus",()=>requestSplitFollow("src","selection"));
+function splitSourceSelection(){splitFollow.selectionUntil=performance.now()+180;requestSplitFollow("src","selection");}
+cm.on("focus",splitSourceSelection);
+cm.getWrapperElement().addEventListener("pointerup",splitSourceSelection);
+cm.getWrapperElement().addEventListener("keyup",splitSourceSelection);
 cm.on("cursorActivity",()=>{if(!cm._silent&&cm.hasFocus())requestSplitFollow("src","selection");});
 for(const event of ["wheel","pointerdown","touchstart"])cm.getScrollerElement().addEventListener(event,()=>{splitFollow.expected.src=null;splitFollow.pending=null;splitFollow.selectionUntil=0;},{passive:true});
 document.addEventListener("selectionchange",()=>{if(ed.wwEditor.view.hasFocus()&&ed.wwEditor.view.dom.contains(document.getSelection()?.anchorNode))requestSplitFollow("ww","selection");});
