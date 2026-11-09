@@ -905,7 +905,8 @@ function splitBlockMap() {
   } finally { wwSyncing=syncing;converter.focusedNode=focused;converter.mappedPosWhenConverting=mapped; }
   if(splitFollow.observer){splitFollow.observer.disconnect();splitFollow.observer.observe(ed.wwEditor.view.dom);for(const child of ed.wwEditor.view.dom.children)splitFollow.observer.observe(child);}
   const leaves=entries.filter(e=>e.block&&(e.node.isTextblock||e.node.isLeaf||["tableCell","customBlock"].includes(e.node.type.name))).sort((a,b)=>a.pos-b.pos);
-  return splitFollow.cache={editor:ed,doc,text,lines,starts,entries,leaves};
+  const rows=entries.filter(e=>e.block&&e.node.type.name==="tableRow").sort((a,b)=>a.pos-b.pos);
+  return splitFollow.cache={editor:ed,doc,text,lines,starts,entries,leaves,rows};
 }
 function splitSourcePosition(map,pos) {
   const line=splitClamp(pos.line,0,map.lines.length-1);
@@ -940,10 +941,22 @@ function splitSetScroll(pane,top) {
 function splitViewportPosition(map,view,y) {
   const leaves=map.leaves;if(!leaves.length)return null;
   const rect=e=>{try{return view.nodeDOM(e.pos)?.getBoundingClientRect()||view.coordsAtPos(e.from);}catch{return null;}};
-  let low=0,high=leaves.length-1;
+  let chosen=null,distance=Infinity,low=0,high=map.rows.length-1;
+  while(low<high){const mid=(low+high)>>1,r=rect(map.rows[mid]);if(r&&r.bottom<y)low=mid+1;else high=mid;}
+  const row=map.rows[low],rowRect=row&&rect(row);
+  if(rowRect&&rowRect.top<=y&&rowRect.bottom>=y){
+    const x=view.dom.getBoundingClientRect().left+32;
+    for(const e of leaves){if(e.min<row.min||e.max>row.max)continue;const r=rect(e);if(!r)continue;
+      const dy=y<r.top?r.top-y:y>r.bottom?y-r.bottom:0,dx=x<r.left?r.left-x:x>r.right?x-r.right:0,gap=dy*100000+dx;
+      if(gap<distance){chosen=e;distance=gap;}
+    }
+    if(!chosen)chosen=row;
+  }
+  low=0;high=leaves.length-1;
   while(low<high){const mid=(low+high)>>1,r=rect(leaves[mid]);if(r&&r.bottom<y)low=mid+1;else high=mid;}
-  let chosen=null,distance=Infinity;
-  for(let i=Math.max(0,low-1);i<=Math.min(leaves.length-1,low+1);i++){
+  const inRow=!!chosen;
+
+  for(let i=Math.max(0,low-1);!inRow&&i<=Math.min(leaves.length-1,low+1);i++){
     const e=leaves[i],r=rect(e);if(!r)continue;
     const gap=y<r.top?r.top-y:y>r.bottom?y-r.bottom:0;
     if(gap<distance){chosen=e;distance=gap;}
