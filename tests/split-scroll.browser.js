@@ -14,7 +14,7 @@ async function runSplitScrollRegression() {
   const close=n=>Math.abs(sourceY(n)-renderedY(n))<45;
   const settled=async fn=>{for(let i=0;i<100&&!fn();i++)await pause(30);};
   const sourceScroll=async n=>{m.cm.getScrollerElement().dispatchEvent(new WheelEvent('wheel',{deltaY:1,bubbles:true}));m.cm.scrollTo(null,m.cm.charCoords({line:srcLine(n),ch:0},'local').top);await pause(90);await settled(()=>close(n));};
-  const renderedScroll=async n=>{const box=rendered();box.dispatchEvent(new WheelEvent('wheel',{deltaY:1,bubbles:true}));box.scrollTop+=renderedY(n)-24;await pause(250);};
+  const renderedScroll=async n=>{const box=rendered();box.dispatchEvent(new WheelEvent('wheel',{deltaY:1,bubbles:true}));box.scrollTop+=renderedY(n)-24;box.dispatchEvent(new Event('scroll'));await pause(90);await settled(()=>close(n));};
   for(const language of ['ko','en','ja','zh']) {
     m.ed.blur();m.setLanguage(language,false);m.setMarkdown(text);m.setMode('split');await pause(140);
     m.cm.focus();m.cm.setCursor({line:0,ch:0});await pause(70);
