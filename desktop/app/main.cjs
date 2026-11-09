@@ -190,7 +190,7 @@ function setupIPC() {
 }
 async function createWindow() {
   rendererReady = false; editorLoaded = false; closing = false; state = {dirty:false,lang:'ko'};
-  mainWindow = new BrowserWindow({width:1440,height:960,minWidth:800,minHeight:600,show:!smoke,title:'Markdown Editor',icon:path.join(APP_ROOT,'icon.png'),webPreferences:{additionalArguments:smoke ? ['--mde-smoke-test'] : [],preload:path.join(APP_ROOT,'preload.cjs'),nodeIntegration:false,nodeIntegrationInSubFrames:false,nodeIntegrationInWorker:false,contextIsolation:true,sandbox:true,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,devTools:!app.isPackaged}});
+  mainWindow = new BrowserWindow({width:1440,height:960,minWidth:800,minHeight:600,show:!smoke,title:'Markdown Editor',icon:path.join(APP_ROOT,'icon.png'),webPreferences:{backgroundThrottling:!smoke,additionalArguments:smoke ? ['--mde-smoke-test'] : [],preload:path.join(APP_ROOT,'preload.cjs'),nodeIntegration:false,nodeIntegrationInSubFrames:false,nodeIntegrationInWorker:false,contextIsolation:true,sandbox:true,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,devTools:!app.isPackaged}});
   capabilities = new security.CapabilityStore(mainWindow.webContents.id);
   const wc = mainWindow.webContents;
   wc.session.setPermissionRequestHandler((_wc,_permission,callback) => callback(false));
@@ -244,7 +244,8 @@ else {
       return new Response(html,{headers:{'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':security.PREVIEW_CSP,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}});
     });
     setupIPC();
-    if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },60000);
+    // Expanded locale and long-link UI suite only; normal startup timeout is unchanged.
+    if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },120000);
     await createWindow();
     app.on('activate', () => { if (!mainWindow && !fatal && !normalFinished) { if (!smoke) readyTimer = setTimeout(() => failStartup('readyTimeout',Object.assign(new Error(),{code:'READY_TIMEOUT'})),60000); void createWindow().catch(error => failStartup('startup',error)); } });
   }).catch(error => failStartup('startup',error));
