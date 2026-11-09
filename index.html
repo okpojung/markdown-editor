@@ -969,7 +969,11 @@ function followSplitPane(pane,kind) {
     try{const rect=view.coordsAtPos(position);splitSetScroll("ww",container.scrollTop+rect.top-targetRect.top-offset);}catch{}
   } else {
     let position;
-    if(kind==="selection")position=view.state.selection.head;
+    if(kind==="selection"){
+      position=view.state.selection.head;
+      const selected=document.getSelection();
+      if(selected?.focusNode&&view.dom.contains(selected.focusNode)){try{position=view.posAtDOM(selected.focusNode,selected.focusOffset);}catch{}}
+    }
     else position=splitViewportPosition(map,view,targetRect.top+24);
     if(position===undefined||position===null)return;
     const point=splitMarkdownPosition(map,position);if(!point)return;
@@ -1007,6 +1011,7 @@ function bindSplitRenderedEvents() {
   const view=ed.wwEditor.view,container=ed.wwEditor.view.dom;
   if(!container||container.dataset.splitFollowBound)return;
   container.dataset.splitFollowBound="true";
+  ed.on("focus",()=>requestSplitFollow("ww","selection"));
   container.addEventListener("scroll",()=>splitScrollChanged("ww"),{passive:true});
   for(const event of ["wheel","pointerdown","touchstart"])container.addEventListener(event,()=>{splitFollow.expected.ww=null;splitFollow.pending=null;splitFollow.selectionUntil=0;},{passive:true});
   for(const event of ["pointerup","keyup"])view.dom.addEventListener(event,()=>requestSplitFollow("ww","selection"));
@@ -1014,6 +1019,7 @@ function bindSplitRenderedEvents() {
   if(typeof ResizeObserver!=="undefined"){splitFollow.observer=new ResizeObserver(()=>requestSplitFollow(splitFollow.last));splitFollow.observer.observe(view.dom);}
 }
 cm.on("scroll",()=>splitScrollChanged("src"));
+cm.on("focus",()=>requestSplitFollow("src","selection"));
 cm.on("cursorActivity",()=>{if(!cm._silent&&cm.hasFocus())requestSplitFollow("src","selection");});
 for(const event of ["wheel","pointerdown","touchstart"])cm.getScrollerElement().addEventListener(event,()=>{splitFollow.expected.src=null;splitFollow.pending=null;splitFollow.selectionUntil=0;},{passive:true});
 document.addEventListener("selectionchange",()=>{if(ed.wwEditor.view.hasFocus()&&ed.wwEditor.view.dom.contains(document.getSelection()?.anchorNode))requestSplitFollow("ww","selection");});
