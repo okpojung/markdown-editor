@@ -24,7 +24,7 @@ async function run(executable,prefix,output) {
       const timer=setTimeout(()=>{
         if(child.pid&&child.exitCode===null){if(process.platform==='win32')cp.execFile('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true},()=>{});else child.kill('SIGKILL');}
         finish(new Error('Electron smoke timeout'));
-      },100000);
+      },160000);
       child.on('error',()=>finish(new Error('Electron smoke launch failed')));
       child.on('exit',code=>finish(code===0?null:new Error('Electron smoke exit '+code)));
     });

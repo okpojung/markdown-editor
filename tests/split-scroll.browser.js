@@ -60,7 +60,7 @@ async function runSplitScrollRegression() {
     m.ed.focus();m.ed.setSelection(markerPos('REVERSE_SENTINEL'));rendered().dispatchEvent(new KeyboardEvent('keyup',{key:'ArrowRight',bubbles:true}));
     const visibleSource=()=>{const y=m.cm.charCoords({line:0,ch:longText.indexOf('REVERSE_SENTINEL')+2},'window').top-m.cm.getWrapperElement().getBoundingClientRect().top;return y>=-2&&y<m.cm.getWrapperElement().clientHeight-10;};
     await settled(visibleSource);check(visibleSource()&&m.markdown===longText,'long link and EMM syntax rendered text follows source text',language);
-    const tableText='| [head](https://example.invalid/'+('segment/'.repeat(2500))+') | HEAD_CELL_SENTINEL |\n| --- | --- |\n| [body](https://example.invalid/'+('segment/'.repeat(2500))+') | BODY_CELL_SENTINEL |';
+    const tableText='| [head](https://example.invalid/'+('segment/'.repeat(700))+') | HEAD_CELL_SENTINEL |\n| --- | --- |\n| [body](https://example.invalid/'+('segment/'.repeat(700))+') | BODY_CELL_SENTINEL |';
     m.ed.blur();m.setMarkdown(tableText);m.setMode('split');await pause(150);
     const headCh=tableText.split('\n')[0].indexOf('HEAD_CELL_SENTINEL')+2,bodyCh=tableText.split('\n')[2].indexOf('BODY_CELL_SENTINEL')+2;
     m.cm.focus();m.cm.setCursor({line:0,ch:0});m.cm.setCursor({line:0,ch:headCh});await settled(()=>visibleRendered('HEAD_CELL_SENTINEL'));

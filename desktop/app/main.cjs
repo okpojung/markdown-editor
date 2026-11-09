@@ -244,7 +244,8 @@ else {
       return new Response(html,{headers:{'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':security.PREVIEW_CSP,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}});
     });
     setupIPC();
-    if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },60000);
+    // Expanded locale and long-link UI suite only; normal startup timeout is unchanged.
+    if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },120000);
     await createWindow();
     app.on('activate', () => { if (!mainWindow && !fatal && !normalFinished) { if (!smoke) readyTimer = setTimeout(() => failStartup('readyTimeout',Object.assign(new Error(),{code:'READY_TIMEOUT'})),60000); void createWindow().catch(error => failStartup('startup',error)); } });
   }).catch(error => failStartup('startup',error));
