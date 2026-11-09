@@ -3,7 +3,7 @@ async function runSplitScrollRegression() {
   const m=window.MDE;
   if(!m||(!window.desktopAPI?.smokeTest&&!document.getElementById('mdData')?.dataset.name?.startsWith('cursor-regression')))throw Error('Isolated split fixture required');
   const cases=[],pause=ms=>new Promise(r=>setTimeout(r,ms));
-  const check=(ok,name,language='shared')=>{if(!ok)throw Error('Split follow: '+language+'/'+name);cases.push({language,name,passed:true});};
+  const check=(ok,name,language='shared')=>{if(!ok){const s=m.cm.getScrollInfo(),r=m.ed.wwEditor.view.dom;throw Error('Split follow: '+language+'/'+name+' '+JSON.stringify({visibility:document.visibilityState,sourceFocus:m.cm.hasFocus(),renderedFocus:m.ed.wwEditor.view.hasFocus(),src:s.top,srcHeight:s.height,srcClient:s.clientHeight,ww:r.scrollTop,wwHeight:r.scrollHeight,wwClient:r.clientHeight}));}cases.push({language,name,passed:true});};
   const chunk=i=>'## Signal '+String(i).padStart(2,'0')+'\n\n'+('Paragraph '+i+' **bold** 한글 中文 日本語. ').repeat(i%3===0?18:4)+'\n\n- Item '+i+'\n  - Nested '+i+'\n'+(i%4===0?'\n| Column A | Column B |\n| --- | --- |\n| cell '+i+' | value |\n\n```js\nconst signal = '+i+';\nconsole.log(signal);\n```\n':'');
   const text=Array.from({length:44},(_,i)=>chunk(i)).join('\n');
   const srcLine=n=>m.cm.getValue().split('\n').findIndex(l=>l==='## Signal '+String(n).padStart(2,'0'));

@@ -190,7 +190,7 @@ function setupIPC() {
 }
 async function createWindow() {
   rendererReady = false; editorLoaded = false; closing = false; state = {dirty:false,lang:'ko'};
-  mainWindow = new BrowserWindow({width:1440,height:960,minWidth:800,minHeight:600,show:!smoke,title:'Markdown Editor',icon:path.join(APP_ROOT,'icon.png'),webPreferences:{additionalArguments:smoke ? ['--mde-smoke-test'] : [],preload:path.join(APP_ROOT,'preload.cjs'),nodeIntegration:false,nodeIntegrationInSubFrames:false,nodeIntegrationInWorker:false,contextIsolation:true,sandbox:true,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,devTools:!app.isPackaged}});
+  mainWindow = new BrowserWindow({width:1440,height:960,minWidth:800,minHeight:600,show:!smoke,title:'Markdown Editor',icon:path.join(APP_ROOT,'icon.png'),webPreferences:{backgroundThrottling:!smoke,additionalArguments:smoke ? ['--mde-smoke-test'] : [],preload:path.join(APP_ROOT,'preload.cjs'),nodeIntegration:false,nodeIntegrationInSubFrames:false,nodeIntegrationInWorker:false,contextIsolation:true,sandbox:true,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,devTools:!app.isPackaged}});
   capabilities = new security.CapabilityStore(mainWindow.webContents.id);
   const wc = mainWindow.webContents;
   wc.session.setPermissionRequestHandler((_wc,_permission,callback) => callback(false));
