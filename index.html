@@ -861,7 +861,7 @@ function splitBlockMap() {
   }
 
   const entries = [], syncing = wwSyncing, converter=ed.convertor, focused=converter.focusedNode, mapped=converter.mappedPosWhenConverting;
-  const kinds={list:["bulletList","orderedList"],item:["listItem"],thematicBreak:["thematicBreak"],htmlBlock:["htmlBlock","paragraph"]};
+  const kinds={list:["bulletList","orderedList"],item:["listItem"],tableCell:["tableCell","tableHeadCell","tableBodyCell"],thematicBreak:["thematicBreak"],htmlBlock:["htmlBlock","paragraph"]};
   const fits=(a,p)=> (kinds[a.type]||[a.type]).includes(p.type.name);
   function pair(a,p,pos) {
     if (!a.sourcepos) return;
@@ -872,6 +872,11 @@ function splitBlockMap() {
       if (first<=last) { start=starts[first]; end=starts[last]; if (/^\s*(`{3,}|~{3,}|\$\$)\s*$/.test(lines[last]||"")) end=Math.max(start,end-1); else end=starts[last]+lines[last].length; }
     }
     entries.push({start,end:Math.max(start,end),from,to:Math.max(from,to),min:pos,max:pos+p.nodeSize,pos,node:p,block:true});
+    if(a.type==="tableCell"&&p.firstChild?.type.name==="paragraph"){
+      const paragraph=p.firstChild,at=pos+1;
+      entries.push({start,end:Math.max(start,end),from:at+1,to:at+paragraph.nodeSize-1,min:at,max:at+paragraph.nodeSize,pos:at,node:paragraph,block:true});
+      inlinePairs(a,paragraph,at);return;
+    }
     if(p.isTextblock&&a.type!=="codeBlock")inlinePairs(a,p,pos);
     if (p.isTextblock || p.isLeaf || !a.firstChild) return;
     let pi=0, pp=pos+1;
@@ -965,7 +970,7 @@ function followSplitPane(pane,kind) {
     const point=kind==="selection"?cm.getCursor("head"):cm.coordsChar({left:sourceRect.left+32,top:sourceRect.top+24},"window");
     const position=splitRenderedPosition(map,splitSourcePosition(map,point));if(position===null)return;
     const sourceY=cm.charCoords(point,"window").top-sourceRect.top;
-    const offset=kind==="selection"?splitClamp(sourceY,24,Math.min(sourceRect.height,targetRect.height)-40):sourceY;
+    const offset=splitClamp(sourceY,24,Math.max(24,Math.min(sourceRect.height,targetRect.height)-40));
     try{const rect=view.coordsAtPos(position);splitSetScroll("ww",container.scrollTop+rect.top-targetRect.top-offset);}catch{}
   } else {
     let position;
@@ -979,7 +984,7 @@ function followSplitPane(pane,kind) {
     const point=splitMarkdownPosition(map,position);if(!point)return;
     let offset=24;
     try{offset=view.coordsAtPos(position).top-targetRect.top;}catch{}
-    if(kind==="selection")offset=splitClamp(offset,24,Math.min(sourceRect.height,targetRect.height)-40);
+    offset=splitClamp(offset,24,Math.max(24,Math.min(sourceRect.height,targetRect.height)-40));
     // CodeMirror measures wrapped off-screen lines only after revealing them.
     // Re-read the same anchor after that viewport measurement, without moving its cursor.
     for(let pass=0;pass<3;pass++){const top=cm.charCoords(point,"local").top-offset;splitSetScroll("src",top);}
@@ -1019,7 +1024,7 @@ function bindSplitRenderedEvents() {
   if(typeof ResizeObserver!=="undefined"){splitFollow.observer=new ResizeObserver(()=>requestSplitFollow(splitFollow.last));splitFollow.observer.observe(view.dom);}
 }
 cm.on("scroll",()=>splitScrollChanged("src"));
-function splitSourceSelection(){splitFollow.selectionUntil=performance.now()+180;requestSplitFollow("src","selection");}
+function splitSourceSelection(){requestSplitFollow("src","selection");}
 cm.on("focus",splitSourceSelection);
 cm.getWrapperElement().addEventListener("pointerup",splitSourceSelection);
 cm.getWrapperElement().addEventListener("keyup",splitSourceSelection);

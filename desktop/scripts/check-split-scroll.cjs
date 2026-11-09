@@ -207,6 +207,38 @@ const expected=[
   {
     "language": "zh",
     "name": "long link and EMM syntax rendered text follows source text"
+  },
+  {
+    "language": "ko",
+    "name": "table header inline source follows rendered cell"
+  },
+  {
+    "language": "ko",
+    "name": "table body inline rendered follows source cell"
+  },
+  {
+    "language": "en",
+    "name": "table header inline source follows rendered cell"
+  },
+  {
+    "language": "en",
+    "name": "table body inline rendered follows source cell"
+  },
+  {
+    "language": "ja",
+    "name": "table header inline source follows rendered cell"
+  },
+  {
+    "language": "ja",
+    "name": "table body inline rendered follows source cell"
+  },
+  {
+    "language": "zh",
+    "name": "table header inline source follows rendered cell"
+  },
+  {
+    "language": "zh",
+    "name": "table body inline rendered follows source cell"
   }
 ];
 function hasCompleteSplitScroll(report){const r=report?.splitScrollBrowser;if(r?.passed!==true||!Array.isArray(r.cases)||r.cases.length!==expected.length||r.cases.some(c=>c?.passed!==true))return false;const keys=new Set(r.cases.map(c=>c.language+':'+c.name));return keys.size===expected.length&&expected.every(c=>keys.has(c.language+':'+c.name));}

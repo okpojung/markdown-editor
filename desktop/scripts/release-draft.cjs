@@ -43,7 +43,7 @@ function validateProof(c, proof, index) {
   const expected = expectedFiles(c.version)[index];
   if (!Array.isArray(proof.artifacts) || proof.artifacts.length!==expected.length || new Set(proof.artifacts.map(a=>a?.file)).size!==expected.length) fail('PROOF_ARTIFACTS');
   for (const a of proof.artifacts) if (!a || !expected.includes(a.file) || path.basename(a.file)!==a.file || !Number.isSafeInteger(a.bytes) || a.bytes<1 || !/^[0-9a-f]{64}(?![\s\S])/.test(a.sha256 || '')) fail('PROOF_ARTIFACTS');
-  return {platform,arch,runId:c.runId,sourceCommit:c.sha,appVersion:c.version,installedSmokePassed:true,renderedTailCases:34,tableGridCases:52,splitScrollCases:52,artifacts:proof.artifacts.map(a=>({file:a.file,bytes:a.bytes,sha256:a.sha256}))};
+  return {platform,arch,runId:c.runId,sourceCommit:c.sha,appVersion:c.version,installedSmokePassed:true,renderedTailCases:34,tableGridCases:52,splitScrollCases:60,artifacts:proof.artifacts.map(a=>({file:a.file,bytes:a.bytes,sha256:a.sha256}))};
 }
 function validateBytes(record, bytes) {
   if (record.bytes!==bytes.length || record.sha256!==crypto.createHash('sha256').update(bytes).digest('hex')) fail('INSTALLER_DIGEST');
