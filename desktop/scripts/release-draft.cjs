@@ -6,6 +6,7 @@ const crypto = require('node:crypto');
 const {spawn} = require('node:child_process');
 const {hasCompleteRenderedTail} = require('./check-rendered-tail.cjs');
 const {hasCompleteTableGrid} = require('./check-table-grid.cjs');
+const {hasCompleteSplitScroll}=require('./check-split-scroll.cjs');
 const PLATFORMS = ['windows-x64','mac-intel-x64','mac-apple-arm64','linux-x64'];
 const JOBS = ['lock','build (windows-2025, x64, win, windows-x64)','build (macos-15-intel, x64, mac, mac-intel-x64)','build (macos-15, arm64, mac, mac-apple-arm64)','build (ubuntu-24.04, x64, linux, linux-x64)'];
 const fail = code => { throw new Error(code); };
@@ -38,11 +39,11 @@ function expectedFiles(version) {
 }
 function validateProof(c, proof, index) {
   const platform = ['win32','darwin','darwin','linux'][index], arch = index===2?'arm64':'x64';
-  if (!proof || String(proof.runId)!==c.runId || proof.sourceCommit!==c.sha || proof.appVersion!==c.version || proof.platform!==platform || proof.arch!==arch || proof.installedSmokePassed!==true || proof.installedSmoke?.ok!==true || proof.installedSmoke?.appVersion!==c.version || !hasCompleteRenderedTail(proof.installedSmoke) || !hasCompleteTableGrid(proof.installedSmoke)) fail('BUILD_PROOF');
+  if (!proof || String(proof.runId)!==c.runId || proof.sourceCommit!==c.sha || proof.appVersion!==c.version || proof.platform!==platform || proof.arch!==arch || proof.installedSmokePassed!==true || proof.installedSmoke?.ok!==true || proof.installedSmoke?.appVersion!==c.version || !hasCompleteRenderedTail(proof.installedSmoke) || !hasCompleteTableGrid(proof.installedSmoke) || !hasCompleteSplitScroll(proof.installedSmoke)) fail('BUILD_PROOF');
   const expected = expectedFiles(c.version)[index];
   if (!Array.isArray(proof.artifacts) || proof.artifacts.length!==expected.length || new Set(proof.artifacts.map(a=>a?.file)).size!==expected.length) fail('PROOF_ARTIFACTS');
   for (const a of proof.artifacts) if (!a || !expected.includes(a.file) || path.basename(a.file)!==a.file || !Number.isSafeInteger(a.bytes) || a.bytes<1 || !/^[0-9a-f]{64}(?![\s\S])/.test(a.sha256 || '')) fail('PROOF_ARTIFACTS');
-  return {platform,arch,runId:c.runId,sourceCommit:c.sha,appVersion:c.version,installedSmokePassed:true,renderedTailCases:34,tableGridCases:52,artifacts:proof.artifacts.map(a=>({file:a.file,bytes:a.bytes,sha256:a.sha256}))};
+  return {platform,arch,runId:c.runId,sourceCommit:c.sha,appVersion:c.version,installedSmokePassed:true,renderedTailCases:34,tableGridCases:52,splitScrollCases:52,artifacts:proof.artifacts.map(a=>({file:a.file,bytes:a.bytes,sha256:a.sha256}))};
 }
 function validateBytes(record, bytes) {
   if (record.bytes!==bytes.length || record.sha256!==crypto.createHash('sha256').update(bytes).digest('hex')) fail('INSTALLER_DIGEST');

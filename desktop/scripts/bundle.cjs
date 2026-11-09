@@ -41,6 +41,7 @@ function replaceOnce(text, before, after) {
   js = replaceOnce(js,previewLine,previewLine.replace('f.srcdoc =','const previewDocument =')+'\n    if (window.desktopAPI) window.desktopAPI.createPreview(previewDocument).then(url => { if (f.isConnected) f.src=url; }).catch(() => { f.title="Preview unavailable"; }); else f.srcdoc=previewDocument;');
   js += '\n'+await fs.readFile(path.join(root,'../tests/rendered-tail.browser.js'),'utf8');
   js += '\n'+await fs.readFile(path.join(root,'../tests/table-grid.browser.js'),'utf8');
+  js += '\n'+await fs.readFile(path.join(root,'../tests/split-scroll.browser.js'),'utf8');
   js += '\n'+await fs.readFile(path.join(root,'scripts/renderer-integration.txt'),'utf8');
   new Function(js);
   const assetMap = Object.fromEntries(manifest.assets.map(a => [a.sourceUrl,a.id]));

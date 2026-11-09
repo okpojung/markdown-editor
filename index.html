@@ -505,8 +505,8 @@ function setLanguage(value,persist=true){const next=normalizeLanguage(value);if(
 // Flush a real pending rendered edit, never serialize untouched Markdown on language changes.
 const pendingSource=!!tSrc,pendingRendered=!!tWw;clearTimeout(tSrc);clearTimeout(tWw);tSrc=0;tWw=0;
 if(pendingRendered&&latestEditSource==='ww'){let text=fromWw(normalizeWw(ed.getMarkdown()));if(md.endsWith('\n')&&!text.endsWith('\n'))text+='\n';md=text;pushToSrc();afterChange();}else if(pendingSource){md=cm.getValue();afterChange();}
-const saved=DOC.saved, text=md, sels=cm.listSelections(), scroll=cm.getScrollInfo(), active=document.activeElement, focus=lastFocus;let selection=null;try{selection=ed.getSelection();}catch{}const wwScroll=$('#ww .toastui-editor-ww-container')?.scrollTop||0;
-uiLang=next;ed.destroy();ed=createEditor();bindEditorEvents();applySettings();try{if(selection)ed.setSelection(...selection);}catch{}wwSel=selection;wwFocused=false;wwStale=false;DOC.saved=saved;md=text;cm.setSelections(sels);cm.scrollTo(scroll.left,scroll.top);const container=$('#ww .toastui-editor-ww-container');if(container)container.scrollTop=wwScroll;lastFocus=focus;applyUiLanguage();updateSourceLineNumbers();if(!$('#sdlg').hidden)drawSettings();if(!$('#dlg').hidden)info();if(!$('#cdlg').hidden){$('#cTitle').textContent=tr(C.range?'코드 블록 수정':'코드 블록 삽입');}if(!$('#ldlg').hidden)$('#lTitle').textContent=tr(LK.range?'링크 수정':'링크 삽입');updStatus();schedulePreviews();if(active&&active.isConnected)active.focus({preventScroll:true});return true;}
+const saved=DOC.saved, text=md, sels=cm.listSelections(), scroll=cm.getScrollInfo(), active=document.activeElement, focus=lastFocus;let selection=null;try{selection=ed.getSelection();}catch{}const wwScroll=ed.wwEditor.view.dom.scrollTop||0;
+uiLang=next;ed.destroy();ed=createEditor();bindEditorEvents();applySettings();try{if(selection)ed.setSelection(...selection);}catch{}wwSel=selection;wwFocused=false;wwStale=false;DOC.saved=saved;md=text;cm.setSelections(sels);cm.scrollTo(scroll.left,scroll.top);const container=ed.wwEditor.view.dom;if(container)container.scrollTop=wwScroll;lastFocus=focus;applyUiLanguage();updateSourceLineNumbers();if(!$('#sdlg').hidden)drawSettings();if(!$('#dlg').hidden)info();if(!$('#cdlg').hidden){$('#cTitle').textContent=tr(C.range?'코드 블록 수정':'코드 블록 삽입');}if(!$('#ldlg').hidden)$('#lTitle').textContent=tr(LK.range?'링크 수정':'링크 삽입');updStatus();schedulePreviews();if(active&&active.isConnected)active.focus({preventScroll:true});return true;}
 const LANG_NAMES={ko:['한국어','KR'],en:['English','EN'],ja:['日本語','JP'],zh:['中文','CN']};
 function flagSvg(l){const base='<svg aria-hidden="true" viewBox="0 0 32 22" width="32" height="22" xmlns="http://www.w3.org/2000/svg">';let s='<rect width="32" height="22" fill="white"/>';if(l==='ja')s+='<circle cx="16" cy="11" r="6" fill="#bc002d"/>';else if(l==='zh')s='<rect width="32" height="22" fill="#de2910"/><path fill="#ffde00" d="m7 3 1.2 3.6H12L9 8.8l1.1 3.5L7 10.2l-3.1 2.1L5 8.8 2 6.6h3.8z"/><g fill="#ffde00"><circle cx="14" cy="3" r=".8"/><circle cx="17" cy="6" r=".8"/><circle cx="17" cy="10" r=".8"/><circle cx="14" cy="13" r=".8"/></g>';else if(l==='en'){for(let n=0;n<7;n++)s+='<rect y="'+(n*3.4)+'" width="32" height="1.7" fill="#b22234"/>';s+='<rect width="14" height="12" fill="#3c3b6e"/>';for(let n=0;n<15;n++)s+='<circle cx="'+(2+n%5*2.5)+'" cy="'+(2+Math.floor(n/5)*3.5)+'" r=".6" fill="white"/>';}else{s+='<path d="M10 11a6 6 0 0 1 12 0c-3 5-9-5-12 0" fill="#cd2e3a"/><path d="M10 11c3-5 9 5 12 0a6 6 0 0 1-12 0" fill="#0047a0"/><g stroke="#111" stroke-width="1.5"><path d="m3 3 5 3m-6-1 5 3m-6-1 5 3m18 6 5 3m-4-5 5 3m-4-5 5 3M25 3l5 3m-6-1 5 3M3 16l5 3m-6-1 5 3"/></g>';}return base+s+'</svg>';}
 function updateLanguagePicker(){const b=$('#langTrigger');if(!b)return;b.innerHTML=flagSvg(uiLang)+'<span>'+LANG_NAMES[uiLang][1]+'</span>';b.setAttribute('aria-label',tr('Language')+': '+LANG_NAMES[uiLang][0]);document.querySelectorAll('[data-ui-language]').forEach(e=>{const selected=e.dataset.uiLanguage===uiLang;e.setAttribute('aria-selected',String(selected));if(e.dataset.uiLanguage==='zh')e.title='简体中文';e.innerHTML=flagSvg(e.dataset.uiLanguage)+'<span>'+LANG_NAMES[e.dataset.uiLanguage][0]+'</span><small>'+(selected?'✓':LANG_NAMES[e.dataset.uiLanguage][1])+'</small>';});}
@@ -811,6 +811,193 @@ document.querySelectorAll("[data-copy-pane]").forEach(button => {
   });
 });
 
+/* Split panes follow semantic Markdown blocks, not whole-document scroll ratios.
+   View-only: never move the other editor's selection, focus, or saved document. */
+const splitFollow = { timer: 0, pending: null, applying: false, expected: {src:null,ww:null}, last: "src", cache: null, observer: null, selectionPane: null, selectionUntil: 0 };
+const splitClamp = (n,lo,hi) => Math.max(lo,Math.min(hi,n));
+function splitBlockMap() {
+  const doc = ed.wwEditor.view.state.doc, text = md;
+  if (splitFollow.cache?.editor === ed && splitFollow.cache.doc === doc && splitFollow.cache.text === text) return splitFollow.cache;
+  const lines = text.split("\n"), starts = [0];
+  for (let i=0;i<lines.length;i++) starts.push(starts[i]+lines[i].length+1);
+  // Map Toast's transformed syntax columns back to the canonical Markdown.
+  const transformed=toWw(text).split("\n");
+  const columns=lines.map((source,line)=>{
+    const target=transformed[line]??source,map=[];let i=0,j=0;
+    while(j<target.length){
+      map[j]=i;
+      if(source[i]===target[j]){i++;j++;continue;}
+      const replacement=[["__","<u>"],["__","</u>"],["==","<mark>"],["==","</mark>"]].find(([a,b])=>S.syntax==="emm"&&source.startsWith(a,i)&&target.startsWith(b,j));
+      if(replacement){const[a,b]=replacement;for(let k=0;k<b.length;k++)map[j+k]=i+Math.floor(k*a.length/b.length);i+=a.length;j+=b.length;continue;}
+      // Only the custom fenced-preview delimiters otherwise change toWw columns.
+      let si=source.length,tj=target.length;while(si>i&&tj>j&&source[si-1]===target[tj-1]){si--;tj--;}
+      if(tj===j){i=si;continue;}
+      for(let k=j;k<tj;k++)map[k]=i+Math.floor((k-j)*(si-i)/(tj-j));i=si;j=tj;
+    }
+    map[target.length]=source.length;return map;
+  });
+  const offset = p => { const l=splitClamp((p?.[0]||1)-1,0,lines.length-1),c=splitClamp((p?.[1]||1)-1,0,columns[l].length-1);return starts[l]+columns[l][c]; };
+  function inlinePairs(ast,node,pos){
+    let rendered="",positions=[];
+    node.forEach((child,childOffset)=>{const at=pos+1+childOffset;if(child.isText){for(let i=0;i<child.text.length;i++){rendered+=child.text[i];positions.push(at+i);}}else{rendered+=child.type.name==="hardBreak"?"\n":"\uFFFC";positions.push(at);}});
+    positions.push(pos+node.nodeSize-1);
+    let cursor=0;
+    function visit(a){
+      let first=null,last=null;
+      if(a.type==="image"){
+        const at=rendered.indexOf("\uFFFC",cursor);if(at>=0){first=at;last=at+1;cursor=last;}
+      }else if(a.type==="text"||a.type==="code"){
+        const literal=a.literal||"",at=literal?rendered.indexOf(literal,cursor):-1;
+        if(at>=0){first=at;last=at+literal.length;cursor=last;}
+      }else{
+        for(let c=a.firstChild;c;c=c.next){const range=visit(c);if(range){if(first===null)first=range[0];last=range[1];}}
+      }
+      if(first===null||!a.sourcepos)return null;
+      const start=offset(a.sourcepos[0]),end=offset([a.sourcepos[1][0],a.sourcepos[1][1]+1]),from=positions[first],to=positions[last];
+      if(from!==undefined&&to!==undefined&&end>=start)entries.push({start,end,from,to,min:from,max:to,pos,node});
+      return [first,last];
+    }
+    for(let a=ast.firstChild;a;a=a.next)visit(a);
+  }
+
+  const entries = [], syncing = wwSyncing, converter=ed.convertor, focused=converter.focusedNode, mapped=converter.mappedPosWhenConverting;
+  const kinds={list:["bulletList","orderedList"],item:["listItem"],thematicBreak:["thematicBreak"],htmlBlock:["htmlBlock","paragraph"]};
+  const fits=(a,p)=> (kinds[a.type]||[a.type]).includes(p.type.name);
+  function pair(a,p,pos) {
+    if (!a.sourcepos) return;
+    let start=offset(a.sourcepos[0]), end=offset([a.sourcepos[1][0],a.sourcepos[1][1]+1]);
+    let from=pos+(p.isLeaf?0:1), to=pos+p.nodeSize-(p.isLeaf?1:1);
+    if (a.type==="codeBlock" && /^(\s*)(`{3,}|~{3,}|\$\$)/.test(lines[a.sourcepos[0][0]-1]||"")) {
+      const first=a.sourcepos[0][0], last=a.sourcepos[1][0]-1;
+      if (first<=last) { start=starts[first]; end=starts[last]; if (/^\s*(`{3,}|~{3,}|\$\$)\s*$/.test(lines[last]||"")) end=Math.max(start,end-1); else end=starts[last]+lines[last].length; }
+    }
+    entries.push({start,end:Math.max(start,end),from,to:Math.max(from,to),min:pos,max:pos+p.nodeSize,pos,node:p});
+    if(p.isTextblock&&a.type!=="codeBlock")inlinePairs(a,p,pos);
+    if (p.isTextblock || p.isLeaf || !a.firstChild) return;
+    let pi=0, pp=pos+1;
+    for(let child=a.firstChild;child;child=child.next) {
+      if(child.type==="tableDelimRow" || child.type==="tableDelimCell" || child.type==="referenceDef")continue;
+      while(pi<p.childCount && p.child(pi).type.name==="paragraph" && p.child(pi).childCount===0 && child.type!=="tableCell") {pp+=p.child(pi++).nodeSize;}
+      if(pi>=p.childCount || !fits(child,p.child(pi)))continue;
+      const current=p.child(pi);pair(child,current,pp);pp+=current.nodeSize;pi++;
+    }
+  }
+  try {
+    wwSyncing=true;
+    // Refresh only the hidden Markdown parser. The visible WW model is untouched.
+    ed.mdEditor.setMarkdown(toWw(text),false);
+    let pi=0, pos=0;
+    for(let a=ed.toastMark.getRootNode().firstChild;a;a=a.next) {
+      const converted=converter.toWysiwygModel(a);
+      if(!converted?.childCount)continue;
+      for(let j=0;j<converted.childCount;j++) {
+        const wanted=converted.child(j);
+        while(pi<doc.childCount && !wanted.eq(doc.child(pi)) && doc.child(pi).type.name==="paragraph" && doc.child(pi).childCount===0)pos+=doc.child(pi++).nodeSize;
+        if(pi>=doc.childCount || !wanted.eq(doc.child(pi)))continue;
+        pair(a,doc.child(pi),pos);pos+=doc.child(pi++).nodeSize;
+      }
+    }
+  } finally { wwSyncing=syncing;converter.focusedNode=focused;converter.mappedPosWhenConverting=mapped; }
+  if(splitFollow.observer){splitFollow.observer.disconnect();splitFollow.observer.observe(ed.wwEditor.view.dom);for(const child of ed.wwEditor.view.dom.children)splitFollow.observer.observe(child);}
+  return splitFollow.cache={editor:ed,doc,text,lines,starts,entries};
+}
+function splitSourcePosition(map,pos) {
+  const line=splitClamp(pos.line,0,map.lines.length-1);
+  return map.starts[line]+splitClamp(pos.ch,0,map.lines[line].length);
+}
+function splitRenderedPosition(map,index) {
+  let candidates=map.entries.filter(e=>index>=e.start&&index<=e.end);
+  candidates.sort((a,b)=>(a.end-a.start)-(b.end-b.start));
+  const e=candidates[0]||map.entries.reduce((best,x)=>!best||Math.min(Math.abs(index-x.start),Math.abs(index-x.end))<Math.min(Math.abs(index-best.start),Math.abs(index-best.end))?x:best,null);
+  if(!e)return null;
+  const ratio=e.end>e.start?splitClamp((index-e.start)/(e.end-e.start),0,1):0;
+  return splitClamp(Math.round(e.from+ratio*(e.to-e.from)),0,map.doc.content.size);
+}
+function splitMarkdownPosition(map,position) {
+  let candidates=map.entries.filter(e=>position>=e.min&&position<=e.max);
+  candidates.sort((a,b)=>(a.max-a.min)-(b.max-b.min));
+  const e=candidates[0]||map.entries.at(-1);if(!e)return null;
+  const ratio=e.to>e.from?splitClamp((position-e.from)/(e.to-e.from),0,1):0;
+  const index=Math.round(e.start+ratio*(e.end-e.start));
+  let line=0;while(line+1<map.lines.length&&map.starts[line+1]<=index)line++;
+  return {line,ch:splitClamp(index-map.starts[line],0,map.lines[line].length)};
+}
+function splitSetScroll(pane,top) {
+  splitFollow.applying=true;
+  try {
+    if(pane==="src") { const s=cm.getScrollInfo();cm.scrollTo(s.left,top);splitFollow.expected.src=cm.getScrollInfo().top; }
+    else {const s=ed.wwEditor.view.dom;s.scrollTop=top;splitFollow.expected.ww=s.scrollTop;}
+  } finally {splitFollow.applying=false;}
+}
+function followSplitPane(pane,kind) {
+  if(mode!=="split"||splitFollow.applying)return;
+  const container=ed.wwEditor.view.dom, view=ed.wwEditor.view;
+  if(!container?.clientHeight || !cm.getScrollInfo().clientHeight)return;
+  const sourceRect=cm.getWrapperElement().getBoundingClientRect(), targetRect=container.getBoundingClientRect();
+  if(kind==="scroll") {
+    const s=pane==="src"?cm.getScrollInfo():{top:container.scrollTop,height:container.scrollHeight,clientHeight:container.clientHeight};
+    if(s.top<=1){splitSetScroll(pane==="src"?"ww":"src",0);return;}
+    if(s.height-s.clientHeight-s.top<=1){splitSetScroll(pane==="src"?"ww":"src",1e9);return;}
+  }
+  let map;try{map=splitBlockMap();}catch{return;}if(!map.entries.length)return;
+  if(pane==="src") {
+    const point=kind==="selection"?cm.getCursor("head"):cm.coordsChar({left:sourceRect.left+32,top:sourceRect.top+24},"window");
+    const position=splitRenderedPosition(map,splitSourcePosition(map,point));if(position===null)return;
+    const sourceY=cm.charCoords(point,"window").top-sourceRect.top;
+    const offset=kind==="selection"?splitClamp(sourceY,24,Math.min(sourceRect.height,targetRect.height)-40):sourceY;
+    try{const rect=view.coordsAtPos(position);splitSetScroll("ww",container.scrollTop+rect.top-targetRect.top-offset);}catch{}
+  } else {
+    let position;
+    if(kind==="selection")position=view.state.selection.head;
+    else {const r=view.dom.getBoundingClientRect();const p=view.posAtCoords({left:splitClamp(r.left+32,targetRect.left+8,targetRect.right-8),top:targetRect.top+24});position=p?.pos;}
+    if(position===undefined)return;
+    const point=splitMarkdownPosition(map,position);if(!point)return;
+    let offset=24;
+    try{offset=view.coordsAtPos(position).top-targetRect.top;}catch{}
+    if(kind==="selection")offset=splitClamp(offset,24,Math.min(sourceRect.height,targetRect.height)-40);
+    // CodeMirror measures wrapped off-screen lines only after revealing them.
+    // Re-read the same anchor after that viewport measurement, without moving its cursor.
+    for(let pass=0;pass<3;pass++){const top=cm.charCoords(point,"local").top-offset;splitSetScroll("src",top);}
+  }
+}
+function requestSplitFollow(pane,kind="scroll") {
+  if(mode!=="split"||splitFollow.applying)return;
+  if(kind==="selection"){splitFollow.selectionPane=pane;splitFollow.selectionUntil=Date.now()+220;}
+  else if(splitFollow.selectionPane===pane&&Date.now()<splitFollow.selectionUntil)kind="selection";
+  splitFollow.last=pane;
+  if(kind==="scroll"&&splitFollow.pending?.pane===pane&&splitFollow.pending.kind==="selection")kind="selection";
+  splitFollow.pending={pane,kind};
+  if(splitFollow.timer)return;
+  const run=()=>{
+    splitFollow.timer=0;if(mode!=="split"){splitFollow.pending=null;return;}
+    if(tSrc||tWw||wwStale){splitFollow.timer=setTimeout(run,80);return;}
+    const pending=splitFollow.pending;splitFollow.pending=null;
+    if(pending)followSplitPane(pending.pane,pending.kind);
+  };
+  splitFollow.timer=-1;queueMicrotask(run);
+}
+function splitScrollChanged(pane) {
+  if(mode!=="split"||splitFollow.applying)return;
+  const top=pane==="src"?cm.getScrollInfo().top:ed.wwEditor.view.dom.scrollTop;
+  if(splitFollow.expected[pane]!==null&&Math.abs(top-splitFollow.expected[pane])<1)return;
+  splitFollow.expected[pane]=null;requestSplitFollow(pane);
+}
+function bindSplitRenderedEvents() {
+  const view=ed.wwEditor.view,container=ed.wwEditor.view.dom;
+  if(!container||container.dataset.splitFollowBound)return;
+  container.dataset.splitFollowBound="true";
+  container.addEventListener("scroll",()=>splitScrollChanged("ww"),{passive:true});
+  for(const event of ["wheel","pointerdown","touchstart"])container.addEventListener(event,()=>{splitFollow.expected.ww=null;splitFollow.pending=null;splitFollow.selectionUntil=0;},{passive:true});
+  for(const event of ["pointerup","keyup"])view.dom.addEventListener(event,()=>requestSplitFollow("ww","selection"));
+  splitFollow.observer?.disconnect();
+  if(typeof ResizeObserver!=="undefined"){splitFollow.observer=new ResizeObserver(()=>requestSplitFollow(splitFollow.last));splitFollow.observer.observe(view.dom);}
+}
+cm.on("scroll",()=>splitScrollChanged("src"));
+cm.on("cursorActivity",()=>{if(!cm._silent&&cm.hasFocus())requestSplitFollow("src","selection");});
+for(const event of ["wheel","pointerdown","touchstart"])cm.getScrollerElement().addEventListener(event,()=>{splitFollow.expected.src=null;splitFollow.pending=null;splitFollow.selectionUntil=0;},{passive:true});
+document.addEventListener("selectionchange",()=>{if(ed.wwEditor.view.hasFocus()&&ed.wwEditor.view.dom.contains(document.getSelection()?.anchorNode))requestSplitFollow("ww","selection");});
+window.addEventListener("resize",()=>requestSplitFollow(splitFollow.last));
+
 /* ---------- sync ---------- */
 let tSrc = 0, tWw = 0, tPost = 0;
 let latestEditSource = "src";
@@ -826,6 +1013,7 @@ cm.on("change", () => {
 });
 let wwSel = null;
 function bindEditorEvents() {
+bindSplitRenderedEvents();
 ed.on("focus", () => { lastFocus = "ww"; wwFocused = true; updStatus(); });
 
 ed.on("blur", () => { wwSel = ed.getSelection(); wwFocused = false; });
@@ -903,6 +1091,7 @@ function setMode(m) {
   const fmtOff = m === "outline";
   document.querySelectorAll("#tools button, #tools select").forEach((b) => (b.disabled = fmtOff));
   updStatus();
+  if(m==="split")setTimeout(()=>requestSplitFollow(lastFocus),0);
 }
 document.querySelectorAll("#modes button").forEach((b) => (b.onclick = () => setMode(b.dataset.mode)));
 $("#tocBtn").onclick = () => { $("#toc").classList.toggle("off"); $("#tocBtn").classList.toggle("on"); setTimeout(() => cm.refresh(), 0); };
