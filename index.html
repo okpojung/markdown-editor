@@ -599,7 +599,7 @@ async function writeTo(kind,asNew){
       const writer=await h.createWritable();await writer.write(new Blob([data],{type}));await writer.close();savedHandle=h;how=tr('저장했습니다');
     }catch(e){if(e.name==='AbortError'){updStatus();return false;}console.warn(e); downloadText(data, suggestedName, type);}
   }else downloadText(data,suggestedName,type);
-  if(epoch===exportDocumentEpoch&&!FRAME_HOST.active&&!EMM&&(!preserve||(PROTECTED_DOCUMENT&&encrypted))){DOC.handle=savedHandle;if(savedHandle)fileName=savedHandle.name;DOC.kind=kind;DOC.saved=snapshot;DOC.fileBound=true;PROTECTED_DOCUMENT=encrypted;}
+  if(epoch===exportDocumentEpoch&&!FRAME_HOST.active&&((!EMM&&!preserve)||(PROTECTED_DOCUMENT&&encrypted))){DOC.handle=savedHandle;if(savedHandle)fileName=savedHandle.name;DOC.kind=kind;DOC.saved=snapshot;DOC.fileBound=true;PROTECTED_DOCUMENT=encrypted;}
   updStatus();flash(suggestedName+' ('+tr(KIND_LABEL[kind])+') '+how);return true;
   } finally { exportInProgress=false; }
 }
