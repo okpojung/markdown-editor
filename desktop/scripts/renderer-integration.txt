@@ -50,7 +50,7 @@ async function runDesktopSmoke(meta) {
     window.addEventListener('message',receive);timer=setTimeout(()=>{window.removeEventListener('message',receive);frame.remove();resolve(false)},6000);frame.src=isolationUrl;document.body.append(frame);
   });
   const offline=await buildHtml(true);
-  tests.offlineExport=offline.includes('id="sUiLanguage"')&&!/<script[^>]+src="https:/.test(offline);
+  tests.offlineExport=offline.includes('id="sUiLanguage"')&&!protectedHtmlParts(offline).querySelector('script[src],link[rel="stylesheet"][href]');
   tests.contextIsolation=typeof require==='undefined'&&typeof process==='undefined';
   const renderedTailBrowser=await runRenderedTailRegression();
   tests.renderedTailBrowser=renderedTailBrowser?.passed===true;
@@ -58,7 +58,7 @@ async function runDesktopSmoke(meta) {
   tests.tableGridBrowser=tableGridBrowser?.passed===true;
   const splitScrollBrowser=await runSplitScrollRegression();
   tests.splitScrollBrowser=splitScrollBrowser?.passed===true;
-  const protectedExportBrowser=await runProtectedExportRegression();
+  const protectedExportBrowser=await runProtectedExportRegression(window.desktopMakeHandle(meta));
   tests.protectedExportBrowser=protectedExportBrowser?.passed===true;
   tests.nativeEncryptedFileRoundtrip=protectedExportBrowser?.nativeFileRoundtrip===true;
   drawSettings();$('#sdlg').hidden=false;

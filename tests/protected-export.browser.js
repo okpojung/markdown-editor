@@ -1,5 +1,5 @@
 /* Disposable fixtures only. Passwords are generated in memory and never reported. */
-async function runProtectedExportRegression(){
+async function runProtectedExportRegression(nativeFixtureHandle=null){
   if(!window.MDE||(!window.desktopAPI?.smokeTest&&!document.getElementById('mdData')?.dataset.name?.startsWith('cursor-regression')))throw new Error('Isolated export fixture required');
   const cases=[],check=(ok,name,language)=>{if(!ok)throw new Error('Protected export: '+language+'/'+name);cases.push({language,name,passed:true});};
   const original={builder:buildHtml,password:askEncryptionPassword,download:downloadText,picker:window.showSaveFilePicker,confirm:window.confirm,alert:window.alert,encrypt:encryptStandaloneHtml,kind:DOC.kind,handle:DOC.handle,saved:DOC.saved,fileBound:DOC.fileBound,name:fileName,protected:PROTECTED_DOCUMENT,frame:{...FRAME_HOST},text:md,lang:uiLang};
@@ -19,10 +19,10 @@ async function runProtectedExportRegression(){
       check(menu.length===3&&!menu.some(b=>b.dataset.act==='online')&&menu.every(b=>b.textContent.trim()),'three export menu choices',language);
       await writeTo('md',true);const mdOk=outputs.length===1&&outputs[0].data===sourceText;reset();
       await writeTo('offline',true);const offline=outputs[0]?.data;
-      const offlineOk=typeof offline==='string'&&!/<script[^>]+src="https:/.test(offline)&&!isEncryptedHtml(offline)&&!!protectedHtmlParts(offline).querySelector('script[data-lib-url="'+MERMAID_URL+'"]:not([src])');
+      const offlineOk=typeof offline==='string'&&!protectedHtmlParts(offline).querySelector('script[src],link[rel="stylesheet"][href]')&&!isEncryptedHtml(offline)&&!!protectedHtmlParts(offline).querySelector('script[data-lib-url="'+MERMAID_URL+'"]:not([src])');
       const legacy='<!doctype html><textarea id="mdData" data-name="legacy.md.html">legacy source</textarea><script data-lib-url="https://example.invalid/lib.js" src="https://example.invalid/lib.js"><\/script>';
       const opened=await loadFile(new File([legacy],'legacy.md.html',{type:'text/html'}),null);reset();await writeTo('online',true);
-      check(mdOk&&offlineOk&&opened&&md==='legacy source'&&outputs.length===1&&!/<script[^>]+src="https:/.test(outputs[0].data),'offline default and legacy online compatibility',language);
+      check(mdOk&&offlineOk&&opened&&md==='legacy source'&&outputs.length===1&&!protectedHtmlParts(outputs[0].data).querySelector('script[src],link[rel="stylesheet"][href]'),'offline default and legacy online compatibility',language);
       PROTECTED_DOCUMENT=false;newDoc(sourceText,'cursor-regression-export.md');reset();await writeTo('encrypted',true);
       const locked=outputs[0]?.data,first=parseEncryptedHtml(locked),plain=await decryptStandaloneHtml(locked,currentPassword);
       check(outputs.length===1&&!locked.includes(sourceText)&&!locked.includes(currentPassword)&&plain.kind==='markdown'&&protectedHtmlParts(plain.html).querySelector('textarea#mdData')?.value===sourceText,'encrypted full offline roundtrip',language);
@@ -50,7 +50,7 @@ async function runProtectedExportRegression(){
     }
     let nativeFileRoundtrip=false;
     if(window.desktopAPI?.smokeTest){
-      const handle=original.handle;
+      const handle=nativeFixtureHandle||original.handle;
       if(!handle||handle.name!=='fixture.md')throw new Error('Disposable native fixture handle required');
       const beforeFile=await handle.getFile(),before=await beforeFile.text(),nativePassword=secret();
       const plain=await buildHtml(true,{markdown:'native encrypted fixture',encrypted:true});

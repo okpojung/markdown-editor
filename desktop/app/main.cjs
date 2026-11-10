@@ -245,7 +245,7 @@ else {
     });
     setupIPC();
     // Expanded locale and long-link UI suite only; normal startup timeout is unchanged.
-    if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },120000);
+    if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },240000);
     await createWindow();
     app.on('activate', () => { if (!mainWindow && !fatal && !normalFinished) { if (!smoke) readyTimer = setTimeout(() => failStartup('readyTimeout',Object.assign(new Error(),{code:'READY_TIMEOUT'})),60000); void createWindow().catch(error => failStartup('startup',error)); } });
   }).catch(error => failStartup('startup',error));
