@@ -84,7 +84,7 @@ Chrome·Edge에서는 처음 저장할 때 파일 위치를 고르면 그다음�
 - 홈페이지의 **편집기 열기**는 현재 홈페이지 언어를 `?lang=ko|en|ja|zh`로 전달합니다. 명시된 주소 언어는 편집기의 이전 선호보다 우선합니다.
 - 변경한 언어는 편집기 선호값으로 저장합니다. 문서 본문·코드·파일명은 번역하지 않습니다.
 - 언어 전환 시 문서·미저장 표시·원문 선택/실행 취소 기록·테마를 유지합니다. 렌더링 창의 내부 실행 취소 기록은 재생성으로 초기화되며, 설정창에도 안내합니다.
-- 온라인/오프라인 md.html에도 4언어 UI와 언어 설정을 포함합니다.
+- 오프라인·암호화 md.html에도 4언어 UI와 언어 설정을 포함합니다.
 - [상세 안내](docs/editor-i18n.md). 이 저장소 변경은 EMM 앱의 사본 교체나 배포를 수행하지 않습니다.
 
 
@@ -100,9 +100,9 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 
 ## 설치 파일 다운로드
 
-[홈페이지 다운로드](https://md-editor.baro.me/#download)와 [GitHub Release v1.0.4](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.4)에서 Windows x64, macOS Intel/Apple Silicon, Linux x64 DEB/AppImage를 선택합니다. `SHA256SUMS.txt`는 설치 파일 5종을 검증합니다.
+[홈페이지 다운로드](https://md-editor.baro.me/#download)와 [GitHub Release v1.0.5](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.5)에서 Windows x64, macOS Intel/Apple Silicon, Linux x64 DEB/AppImage를 선택합니다. `SHA256SUMS.txt`는 설치 파일 5종을 검증합니다.
 
-[검증한 빌드 소스](https://github.com/okpojung/markdown-editor/commit/16ad7c40760fd1434643dd3a8a5e9b410c45d139)와 [4플랫폼 CI](https://github.com/okpojung/markdown-editor/actions/runs/42559519709). 각 설치 앱에서 분할 동기화 60개·표 격자 52개·기존 표/코드 34개를 통과했습니다. [게시 준비 검증](https://github.com/okpojung/markdown-editor/actions/runs/42560155598)은 main 전체 tree 일치, 설치 파일 5종의 바이트 수·SHA-256 및 설치 증거를 확인했습니다. Windows 별도 표준 계정 로그인은 미검증이며 Windows Authenticode와 macOS Developer ID 서명·공증은 미완료입니다. AppImage FUSE 실구동과 EMM 운영 사본 반영은 별도 확인 대상입니다.
+[검증한 빌드 소스](https://github.com/okpojung/markdown-editor/commit/60b8310095183e016683e57cd82041138c2a15f0)와 [4플랫폼 CI](https://github.com/okpojung/markdown-editor/actions/runs/42802224081). 각 설치 앱에서 분할 동기화 60개·표 격자 52개·기존 표/코드 34개·암호화 내보내기 24개와 실제 네이티브 암호문 파일 왕복 검사를 통과했습니다. [게시 준비 검증](https://github.com/okpojung/markdown-editor/actions/runs/42804916716)은 main 전체 tree 일치, 설치 파일 5종의 바이트 수·SHA-256 및 설치 증거를 확인했습니다. Windows 별도 표준 계정 로그인은 미검증이며 Windows Authenticode와 macOS Developer ID 서명·공증은 미완료입니다. AppImage FUSE 실구동과 EMM 운영 사본 반영은 별도 확인 대상입니다.
 
 ## 문서 끝 표·코드블록 커서 수정
 표·일반 코드블록·Mermaid/HTML 미리보기로 끝나는 문서에서 블록 아래에 커서를 놓고 계속 입력할 수 있습니다. 기존 마지막 문단은 중복 추가하지 않습니다. 공통 원본 index.html을 웹·데스크톱 빌드에 사용하며 tests/rendered-tail.browser.js로 4언어·렌더링/분할·원문 동기화·Undo/Redo 34개 합성 검사를 제공합니다. EMM 사본은 앱 담당이 동일 커밋을 반영해야 합니다.
