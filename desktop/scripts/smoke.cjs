@@ -8,6 +8,7 @@ const {preserveSmokeEvidence}=require('./smoke-evidence.cjs');
 const {hasCompleteRenderedTail}=require('./check-rendered-tail.cjs');
 const {hasCompleteTableGrid}=require('./check-table-grid.cjs');
 const {hasCompleteSplitScroll}=require('./check-split-scroll.cjs');
+const {hasCompleteProtectedExport}=require('./check-protected-export.cjs');
 async function run(executable,prefix,output) {
   const dir=await fs.mkdtemp(path.join(os.tmpdir(),'markdown-editor-smoke-'));
   const fixture=path.join(dir,'fixture.md');
@@ -24,13 +25,13 @@ async function run(executable,prefix,output) {
       const timer=setTimeout(()=>{
         if(child.pid&&child.exitCode===null){if(process.platform==='win32')cp.execFile('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true},()=>{});else child.kill('SIGKILL');}
         finish(new Error('Electron smoke timeout'));
-      },160000);
+      },300000);
       child.on('error',()=>finish(new Error('Electron smoke launch failed')));
       child.on('exit',code=>finish(code===0?null:new Error('Electron smoke exit '+code)));
     });
   } catch(error) {childFailure=error;}
   let report=null;try{report=JSON.parse(await fs.readFile(output,'utf8'));}catch{}
-  if(childFailure||!report||report.ok!==true||!hasCompleteRenderedTail(report)||!hasCompleteTableGrid(report)||!hasCompleteSplitScroll(report)){
+  if(childFailure||!report||report.ok!==true||!hasCompleteRenderedTail(report)||!hasCompleteTableGrid(report)||!hasCompleteSplitScroll(report)||!hasCompleteProtectedExport(report)){
     const evidence=await preserveSmokeEvidence(output,path.basename(output,'.json'));
     const failure=new Error((childFailure?.message||'Smoke reported failure')+'; failure report preserved: '+evidence.report);
     failure.report=report;throw failure;
