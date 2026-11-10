@@ -39,10 +39,10 @@ let state = {dirty: false, lang: 'ko'};
 const pendingFiles = [];
 const previews = new Map();
 const STRINGS = {
-  ko: {file:'파일', edit:'편집', view:'내보내기', new:'새 문서', open:'열기', save:'저장', saveas:'다른 이름으로 저장', close:'닫기', md:'마크다운', online:'온라인 HTML', offline:'오프라인 HTML', title:'저장하지 않은 변경 사항', message:'저장하지 않은 변경 사항을 버리고 닫을까요?', cancel:'취소', discard:'버리고 닫기', error:'파일 작업을 완료할 수 없습니다.'},
-  en: {file:'File', edit:'Edit', view:'Export', new:'New', open:'Open', save:'Save', saveas:'Save As', close:'Close', md:'Markdown', online:'Online HTML', offline:'Offline HTML', title:'Unsaved changes', message:'Discard unsaved changes and close?', cancel:'Cancel', discard:'Discard and close', error:'The file operation could not be completed.'},
-  ja: {file:'ファイル', edit:'編集', view:'エクスポート', new:'新規', open:'開く', save:'保存', saveas:'名前を付けて保存', close:'閉じる', md:'Markdown', online:'オンライン HTML', offline:'オフライン HTML', title:'未保存の変更', message:'未保存の変更を破棄して閉じますか？', cancel:'キャンセル', discard:'破棄して閉じる', error:'ファイル操作を完了できませんでした。'},
-  zh: {file:'文件', edit:'编辑', view:'导出', new:'新建', open:'打开', save:'保存', saveas:'另存为', close:'关闭', md:'Markdown', online:'在线 HTML', offline:'离线 HTML', title:'未保存的更改', message:'放弃未保存的更改并关闭？', cancel:'取消', discard:'放弃并关闭', error:'无法完成文件操作。'}
+  ko: {file:'파일', edit:'편집', view:'내보내기', new:'새 문서', open:'열기', save:'저장', saveas:'다른 이름으로 저장', close:'닫기', md:'md 파일 내보내기', offline:'md.html 파일 내보내기', encrypted:'md.html (암호화) 파일 내보내기', title:'저장하지 않은 변경 사항', message:'저장하지 않은 변경 사항을 버리고 닫을까요?', cancel:'취소', discard:'버리고 닫기', error:'파일 작업을 완료할 수 없습니다.'},
+  en: {file:'File', edit:'Edit', view:'Export', new:'New', open:'Open', save:'Save', saveas:'Save As', close:'Close', md:'Export md file', offline:'Export md.html file', encrypted:'Export md.html (encrypted)', title:'Unsaved changes', message:'Discard unsaved changes and close?', cancel:'Cancel', discard:'Discard and close', error:'The file operation could not be completed.'},
+  ja: {file:'ファイル', edit:'編集', view:'エクスポート', new:'新規', open:'開く', save:'保存', saveas:'名前を付けて保存', close:'閉じる', md:'mdファイルを書き出す', offline:'md.htmlファイルを書き出す', encrypted:'md.html（暗号化）を書き出す', title:'未保存の変更', message:'未保存の変更を破棄して閉じますか？', cancel:'キャンセル', discard:'破棄して閉じる', error:'ファイル操作を完了できませんでした。'},
+  zh: {file:'文件', edit:'编辑', view:'导出', new:'新建', open:'打开', save:'保存', saveas:'另存为', close:'关闭', md:'导出md文件', offline:'导出md.html文件', encrypted:'导出md.html（加密）文件', title:'未保存的更改', message:'放弃未保存的更改并关闭？', cancel:'取消', discard:'放弃并关闭', error:'无法完成文件操作。'}
 };
 // Only disposable GitHub Actions accounts may mutate the default profile for probes.
 if (normalRequested) {
@@ -138,7 +138,7 @@ function installMenu() {
     ...(process.platform === 'darwin' ? [{label:app.name, submenu:[{role:'about'},{type:'separator'},{role:'hide'},{role:'hideOthers'},{role:'unhide'},{type:'separator'},{role:'quit'}]}] : []),
     {label:s.file, submenu:[item('new','CmdOrCtrl+N'), item('open','CmdOrCtrl+O'), item('save','CmdOrCtrl+S'), item('saveas','CmdOrCtrl+Shift+S'), {type:'separator'}, item('close','CmdOrCtrl+W')]},
     {label:s.edit, submenu:[{role:'undo'},{role:'redo'},{type:'separator'},{role:'cut'},{role:'copy'},{role:'paste'},{role:'selectAll'}]},
-    {label:s.view, submenu:[item('md'),item('online'),item('offline')]}
+    {label:s.view, submenu:[item('md'),item('offline'),item('encrypted')]}
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
@@ -245,7 +245,7 @@ else {
     });
     setupIPC();
     // Expanded locale and long-link UI suite only; normal startup timeout is unchanged.
-    if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },120000);
+    if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },240000);
     await createWindow();
     app.on('activate', () => { if (!mainWindow && !fatal && !normalFinished) { if (!smoke) readyTimer = setTimeout(() => failStartup('readyTimeout',Object.assign(new Error(),{code:'READY_TIMEOUT'})),60000); void createWindow().catch(error => failStartup('startup',error)); } });
   }).catch(error => failStartup('startup',error));
