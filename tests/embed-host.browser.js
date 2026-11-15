@@ -42,7 +42,7 @@ async function runEmbedHostRegression(frameId = "embedEditor") {
     send({type:"mde:saved"}); await pause(30); check(!dirty(), "bare acknowledgement clears saved version");
     const beforeUnload = new w.Event("beforeunload", {cancelable:true}); w.dispatchEvent(beforeUnload);
     check(!beforeUnload.defaultPrevented, "saved frame has no unload warning");
-    w.document.getElementById("closeBtn").click(); check(confirms === 0, "saved close has no confirmation");
+    w.document.querySelector('#fileList [data-act="close"]').click(); check(confirms === 0, "saved close has no confirmation");
     w.MDE.setMarkdown("protected change");
     const script = w.document.createElement("script");
     script.textContent = 'window.postMessage({type:"mde:saved"},"*");window.postMessage({type:"mde:config",name:"attacker.md"},"*");';
@@ -52,7 +52,7 @@ async function runEmbedHostRegression(frameId = "embedEditor") {
     check(!w.document.title.includes("wrong-origin"), "pinned origin rejects mismatched sender");
     send({type:"mde:config",name:"회의록.md",saveLabel:"EMM에 저장"}); await pause(30);
     check(dirty(), "metadata update does not falsely mark edits saved");
-    w.document.getElementById("closeBtn").click(); check(confirms === 1, "dirty close still confirms");
+    w.document.querySelector('#fileList [data-act="close"]').click(); check(confirms === 1, "dirty close still confirms");
     check(localSaves === 0, "embedded save never calls local file picker");
     send({type:"mde:saved",markdown:w.MDE.markdown}); await pause(30);
     return {passed:true,cases};

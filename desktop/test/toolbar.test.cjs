@@ -1,0 +1,7 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const {hasCompleteToolbar,TOOLBAR_CASES}=require('../scripts/check-toolbar.cjs');
+const report=()=>({tests:{toolbarBrowser:true},toolbarBrowser:{passed:true,cases:TOOLBAR_CASES.map(c=>({...c}))}});
+test('all exact 152 toolbar cases are required',()=>{assert.equal(TOOLBAR_CASES.length,152);assert.equal(hasCompleteToolbar(report()),true);});
+test('toolbar rejects missing, failed, duplicate, foreign and unacknowledged cases',()=>{for(const mutate of [r=>delete r.tests.toolbarBrowser,r=>r.toolbarBrowser.passed=false,r=>r.toolbarBrowser.cases.pop(),r=>r.toolbarBrowser.cases[0].passed=false,r=>r.toolbarBrowser.cases[1]={...r.toolbarBrowser.cases[0]},r=>r.toolbarBrowser.cases[0].language='foreign']){const r=report();mutate(r);assert.equal(hasCompleteToolbar(r),false);}});
+test('toolbar harness is parsed, bundled and enforced by smoke and release',()=>{const root=path.resolve(__dirname,'../..');new vm.Script(fs.readFileSync(path.join(root,'tests/toolbar.browser.js'),'utf8'));for(const file of ['desktop/scripts/smoke.cjs','desktop/scripts/release-draft.cjs'])assert.match(fs.readFileSync(path.join(root,file),'utf8'),/hasCompleteToolbar/);assert.match(fs.readFileSync(path.join(root,'desktop/scripts/bundle.cjs'),'utf8'),/tests\/toolbar.browser.js/);assert.match(fs.readFileSync(path.join(root,'desktop/scripts/renderer-integration.txt'),'utf8'),/runToolbarRegression/);});
