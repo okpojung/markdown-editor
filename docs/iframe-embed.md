@@ -9,7 +9,7 @@ frame.contentWindow.postMessage({type:"mde:set",markdown:loadedMarkdown}, editor
 frame.contentWindow.postMessage({type:"mde:mode",mode:"rendered"}, editorOrigin);
 ```
 
-iframe은 목차를 접고 시작합니다. 목차 단추로 다시 펼칠 수 있습니다. 파일·저장·닫기는 첫 줄 오른쪽의 같은 묶음에 고정됩니다. 좁아진 보기 선택 영역은 가로로 스크롤할 수 있습니다. 일반 탭·데스크톱의 기본 목차는 변경하지 않습니다.
+iframe은 목차를 접고 시작합니다. 보기 메뉴에서 목차를 다시 펼칠 수 있습니다. 파일·보기·제목·텍스트 강조·글머리·삽입 순서의 한 줄 메뉴를 사용하고, 좁은 화면에서는 도구 그룹을 아이콘 하위 메뉴로 표시합니다. 문서 닫기는 파일 메뉴에만 두고, 분할 왼쪽 창의 닫기는 렌더링 보기로 전환하며 문서를 닫지 않습니다. 일반 탭·데스크톱의 기본 목차는 변경하지 않습니다.
 
 ## 저장
 설정된 iframe의 저장 단추·파일 메뉴 저장·Ctrl+S·Cmd+S는 PC 파일 저장이 아니라 부모에게 `{type:"mde:save",markdown}`를 보냅니다. 부모는 반드시 `event.source === frame.contentWindow`와 실제 editorOrigin을 확인하고, 해당 첨부의 저장이 성공한 다음에만 응답합니다.
