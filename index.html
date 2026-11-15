@@ -1436,7 +1436,7 @@ function srcList(kind) {
 function wwRestore() { const keep = !wwFocused && wwSel; ed.focus(); if (keep) ed.setSelection(wwSel[0], wwSel[1]); }
 function wwExec(cmd, payload) {
   wwUserOp = true;
-  try { wwRestore(); ed.exec(cmd, payload); } catch (e) { console.warn("exec failed", cmd, e); }
+  try { wwRestore(); ed.exec(cmd, payload); wwSel = ed.getSelection(); } catch (e) { console.warn("exec failed", cmd, e); }
   setTimeout(() => (wwUserOp = false), 400);
 }
 // underline / highlight in the rendered pane: Toast UI has no command, so mark the selection with invisible

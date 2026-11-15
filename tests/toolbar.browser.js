@@ -8,7 +8,7 @@ async function runToolbarRegression(){
  try{for(const language of ['ko','en','ja','zh']){
   m.setLanguage(language,false);m.setSplitLeft('md');
   for(const target of ['src','ww'])for(const kind of ['ul','ol','task']){
-   m.setMarkdown('');m.setMode(target==='src'?'md':'rendered');if(target==='src')m.cm.focus();else{m.ed.focus();m.ed.setSelection(1,1);}
+   m.setMarkdown('');m.setMode(target==='src'?'md':'rendered');if(target==='src')m.cm.focus();else{m.ed.focus();m.ed.eventEmitter.emit('focus','wysiwyg');m.ed.setSelection(1,1);}
    const prefix={ul:'- ',ol:'1. ',task:'- [ ] '}[kind],id=target+'/'+kind;
    click('[data-fmt="'+kind+'"]');settle();check(m.markdown===prefix,language,id+'/empty marker');
    click('[data-fmt="'+kind+'"]');settle();check(m.markdown==='',language,id+'/empty cancel');
@@ -16,7 +16,7 @@ async function runToolbarRegression(){
    click('[data-fmt="'+kind+'"]');settle();check(m.markdown==='Item',language,id+'/toggle keeps text');
   }
   for(const kind of ['ul','ol','task']){
-   const prefix={ul:'- ',ol:'1. ',task:'- [ ] '}[kind];m.setMarkdown('- Parent\n  '+prefix+'Child');m.setMode('rendered');m.ed.focus();let position=null;m.ed.wwEditor.view.state.doc.descendants((node,pos)=>{if(node.isText&&node.text==='Child')position=pos;});if(position===null)throw Error('Nested fixture missing child');const view=m.ed.wwEditor.view;view.dispatch(view.state.tr.delete(position,position+5));m.ed.setSelection(position,position);settle();click('[data-fmt="'+kind+'"]');settle();const s=m.ed.wwEditor.view.state.selection;let list=false;for(let d=s.$from.depth;d>0;d--)if(s.$from.node(d).type.name==='listItem')list=true;check(!list,language,'nested/'+kind+'/remove marker');check(m.markdown.includes('Parent'),language,'nested/'+kind+'/keep parent');
+   const prefix={ul:'- ',ol:'1. ',task:'- [ ] '}[kind];m.setMarkdown('- Parent\n  '+prefix+'Child');m.setMode('rendered');m.ed.focus();m.ed.eventEmitter.emit('focus','wysiwyg');let position=null;m.ed.wwEditor.view.state.doc.descendants((node,pos)=>{if(node.isText&&node.text==='Child')position=pos;});if(position===null)throw Error('Nested fixture missing child');const view=m.ed.wwEditor.view;view.dispatch(view.state.tr.delete(position,position+5));m.ed.setSelection(position,position);settle();click('[data-fmt="'+kind+'"]');settle();const s=m.ed.wwEditor.view.state.selection;let list=false;for(let d=s.$from.depth;d>0;d--)if(s.$from.node(d).type.name==='listItem')list=true;check(!list,language,'nested/'+kind+'/remove marker');check(m.markdown.includes('Parent'),language,'nested/'+kind+'/keep parent');
   }
   const text='# Heading\n\nBody\n\n- Item\n';m.setMarkdown(text);m.setSplitLeft('md');m.setMode('split');
   check(getComputedStyle(document.getElementById('srcPane')).display!=='none'&&m.splitLeft==='md',language,'split/default MD');
