@@ -251,50 +251,18 @@
   .mde-html { width: 100%; border: 0; height: 80px; background: #fff; display: block; }
 .lang-picker{position:relative}.lang-picker svg{flex:none;border:1px solid #ddd;border-radius:2px}.lang-picker #langTrigger{display:flex;align-items:center;gap:8px;border-radius:16px;height:38px}.lang-picker #langList{position:absolute;right:0;top:44px;width:240px;max-width:calc(100vw - 20px);padding:8px;background:#fff;color:#0d2944;border-radius:16px;box-shadow:0 8px 28px #0003;z-index:100}.lang-picker #langList[hidden]{display:none}.lang-picker #langList button{width:100%;height:60px;display:flex;align-items:center;gap:16px;background:#fff;color:#0d2944;border:0;font-size:16px}.lang-picker #langList button[aria-selected=true]{font-weight:bold}.lang-picker small{margin-left:auto;color:#8898aa}.lang-picker button:focus-visible{outline:2px solid #168c99}
 @media(max-width:640px){.sgrid{grid-template-columns:minmax(0,1fr);gap:7px}.sgrid select{min-width:0;max-width:100%;width:100%}.sgrid>label:not(.chk){margin-top:5px}.sbox .mid{min-width:0;overflow-wrap:anywhere}.cgrid{grid-template-columns:minmax(0,1fr)}}
+
+/* v1.0.6: one row in every host, groups collapse instead of wrapping. */
+#bar,body.mde-embedded #bar{display:flex;flex-wrap:nowrap;gap:5px;align-items:center;padding:6px 8px;min-width:0;flex:none;position:relative;z-index:10}
+#bar>*,#tools>*{flex-shrink:0}#bar>.sp{flex:1;min-width:0}#bar #tools{display:flex;flex-wrap:nowrap;gap:4px;overflow:visible;max-width:none}#fileActions,#viewControls{overflow:visible;flex:none}#bar #editorMeta{flex:none;gap:4px}#bar #editorMeta #langTrigger{height:30px;padding:0 6px;border-radius:6px;gap:4px}#bar #editorMeta #setBtn{width:32px;padding:0}#bar button svg,.split-left-tools svg{width:16px;height:16px;flex:none}#bar #saveBtn{flex:none;max-width:140px;white-space:nowrap}#editorStatus{flex:none;border-top:1px solid var(--bd);padding:3px 10px;background:var(--bg);min-height:23px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#editorStatus #status{font-size:11px}
+.tool-group{display:flex;align-items:center;border-left:1px solid var(--bd);padding-left:5px;gap:3px}.tool-items{display:flex;gap:3px}#tools .group-trigger{display:none}.tool-caption{display:none}#bar .mlist{position:fixed;right:auto;z-index:110;max-height:calc(100dvh - 64px);max-width:calc(100vw - 16px);overflow:auto;background:var(--panel);color:var(--tx)}#bar .mlist button{display:flex;width:100%;height:auto;min-height:34px;text-align:left;align-items:center;justify-content:space-between;white-space:normal}#viewList #modes{display:flex;flex-direction:column}#viewList #modes button{border-radius:5px!important;margin:0}#viewList #tocBtn{min-width:200px}#viewExtras:empty{display:none}#viewExtras{display:flex;gap:6px;padding:4px}#bar button:focus-visible,#bar select:focus-visible{outline:2px solid var(--ac);outline-offset:2px}.split-left-tools{display:none;gap:3px;align-items:center;flex:none}.split-left-tools button{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:2px 4px;border:1px solid var(--bd);border-radius:4px;background:var(--panel);color:var(--tx);cursor:pointer}.split-left-tools button[aria-pressed="true"]{border-color:var(--ac);color:var(--ac)}main[data-mode="split"] .split-left-tools{display:flex}main[data-mode="split"][data-left="outline"] #srcPane{display:none}main[data-mode="split"][data-left="outline"] #outPane{display:flex;flex:var(--l,50) 1 0px}main[data-mode="split"] .ptitle{align-items:center;flex-wrap:wrap;gap:4px}main[data-mode="split"] #outPane .pane-label{font-size:0}main[data-mode="split"] #outPane .pane-label:after{content:none}main[data-mode="split"] #outPane .pane-label span{font-size:0}
+@media(max-width:1000px){#tools .group-trigger{display:inline-flex;width:34px;padding:0}.tool-items{display:none;position:fixed;z-index:110;min-width:200px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 64px);overflow:auto;padding:6px;flex-direction:column;background:var(--panel);border:1px solid var(--bd);border-radius:8px;box-shadow:0 8px 24px #0003}.tool-group[data-open="true"] .tool-items{display:flex}.tool-items .tool-caption{display:inline;margin-left:10px;font-size:13px}#tools .tool-items button{justify-content:flex-start;min-height:38px;width:100%}.tool-group{padding-left:4px}#bar #saveBtn{width:32px;min-width:32px;overflow:hidden;padding:0;font-size:0}#bar #saveBtn:after{content:'';display:block;width:16px;height:16px;margin:auto;background:currentColor;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20fill%3D%22black%22%20d%3D%22M2%201h10l3%203v11H1V1h1zm2%201v4h7V2H4zm0%207v5h8V9H4z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat}#bar #editorMeta #langTrigger>span{display:none}}
+@media(max-width:520px){#bar #editorMeta{display:none}#bar,body.mde-embedded #bar{gap:3px;padding:5px 4px}#bar #tools{gap:2px}.tool-group{padding-left:3px}#tools .group-trigger{width:30px;min-width:30px}#bar #hSel{width:38px;padding:0 2px}#bar #fileBtn,#bar #viewBtn{padding:0 6px;min-width:42px}#bar #fileBtn{font-size:0}#bar #fileBtn span{font-size:12px}#bar #viewBtn{font-size:12px}#bar #viewBtn>span:last-child{display:none}#bar #saveBtn{width:28px;min-width:28px}#bar>.sp{display:none}#bar #editorMeta:empty{display:none}#viewExtras #setBtn{width:32px;padding:0;justify-content:center}#viewExtras #langTrigger{height:32px}#bar #langList{position:fixed;top:80px;right:8px}main[data-mode="split"] .pane-actions{flex-wrap:wrap;gap:2px}main[data-mode="split"] .pane-actions button{padding:2px 4px}#toc{max-width:40vw}.ptitle .pane-label{overflow:hidden;text-overflow:ellipsis}.pane.tgt .pane-label:after{content:none}}
 </style>
 </head>
 <body>
 <textarea id="mdData" hidden data-name=""></textarea>
-<header id="bar">
-  <div id="viewControls">
-  <button id="tocBtn" class="on" title="왼쪽 목차 접기/펼치기" data-i18n-title="%EC%99%BC%EC%AA%BD%20%EB%AA%A9%EC%B0%A8%20%EC%A0%91%EA%B8%B0%2F%ED%8E%BC%EC%B9%98%EA%B8%B0"><span data-i18n="%E2%98%B0%20%EB%AA%A9%EC%B0%A8">☰ 목차</span></button>
-  <div class="seg" id="modes">
-    <button data-mode="md"><span data-i18n="%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4">마크다운</span></button>
-    <button data-mode="outline"><span data-i18n="%EC%95%84%EC%9B%83%EB%9D%BC%EC%9D%B8">아웃라인</span></button>
-    <button data-mode="rendered"><span data-i18n="%EB%A0%8C%EB%8D%94%EB%A7%81">렌더링</span></button>
-    <button data-mode="split"><span data-i18n="%EB%B6%84%ED%95%A0">분할</span></button>
-  </div>
-  </div>
-  <span class="vsep"></span>
-  <div id="tools">
-    <select id="hSel" title="제목 단계 (커서가 있는 줄)" data-i18n-title="%EC%A0%9C%EB%AA%A9%20%EB%8B%A8%EA%B3%84%20(%EC%BB%A4%EC%84%9C%EA%B0%80%20%EC%9E%88%EB%8A%94%20%EC%A4%84)">
-      <option value="" data-i18n="%EC%A0%9C%EB%AA%A9">제목</option>
-      <option value="0" data-i18n="%EB%B3%B8%EB%AC%B8">본문</option>
-      <option value="1">H1</option><option value="2">H2</option><option value="3">H3</option>
-      <option value="4">H4</option><option value="5">H5</option><option value="6">H6</option>
-    </select>
-    <span class="tsep"></span>
-    <button data-fmt="bold" title="굵게 (Ctrl+B)" data-i18n-title="%EA%B5%B5%EA%B2%8C%20(Ctrl%2BB)"><b>B</b></button>
-    <button data-fmt="italic" title="기울임 (Ctrl+I)" data-i18n-title="%EA%B8%B0%EC%9A%B8%EC%9E%84%20(Ctrl%2BI)"><i style="font-family:serif">I</i></button>
-    <button data-fmt="strike" title="취소선" data-i18n-title="%EC%B7%A8%EC%86%8C%EC%84%A0"><s>S</s></button>
-    <button data-fmt="underline" title="밑줄 (Ctrl+U)" data-i18n-title="%EB%B0%91%EC%A4%84%20(Ctrl%2BU)"><u>U</u></button>
-    <button data-fmt="highlight" title="하이라이트 (다시 누르면 해제)" data-i18n-title="%ED%95%98%EC%9D%B4%EB%9D%BC%EC%9D%B4%ED%8A%B8%20(%EB%8B%A4%EC%8B%9C%20%EB%88%84%EB%A5%B4%EB%A9%B4%20%ED%95%B4%EC%A0%9C)"><span class="hl-ic">H</span></button>
-    <span class="tsep"></span>
-    <button data-fmt="ul" title="글머리 기호 (다시 누르면 해제)" data-i18n-title="%EA%B8%80%EB%A8%B8%EB%A6%AC%20%EA%B8%B0%ED%98%B8%20(%EB%8B%A4%EC%8B%9C%20%EB%88%84%EB%A5%B4%EB%A9%B4%20%ED%95%B4%EC%A0%9C)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="2.5" cy="4" r="1" fill="currentColor"/><circle cx="2.5" cy="8" r="1" fill="currentColor"/><circle cx="2.5" cy="12" r="1" fill="currentColor"/><path d="M6 4h8M6 8h8M6 12h8"/></svg></button>
-    <button data-fmt="ol" title="번호 매기기 (다시 누르면 해제)" data-i18n-title="%EB%B2%88%ED%98%B8%20%EB%A7%A4%EA%B8%B0%EA%B8%B0%20(%EB%8B%A4%EC%8B%9C%20%EB%88%84%EB%A5%B4%EB%A9%B4%20%ED%95%B4%EC%A0%9C)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><text x="0" y="6" font-size="5.5" fill="currentColor" stroke="none" font-family="sans-serif">1</text><text x="0" y="14" font-size="5.5" fill="currentColor" stroke="none" font-family="sans-serif">2</text><path d="M6 4h8M6 8h8M6 12h8"/></svg></button>
-    <button data-fmt="task" title="체크박스 (- [ ] — 다시 누르면 해제)" data-i18n-title="%EC%B2%B4%ED%81%AC%EB%B0%95%EC%8A%A4%20(-%20%5B%20%5D%20%E2%80%94%20%EB%8B%A4%EC%8B%9C%20%EB%88%84%EB%A5%B4%EB%A9%B4%20%ED%95%B4%EC%A0%9C)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><path d="M4.5 8.2l2.3 2.3 4.7-5"/></svg></button>
-    <span class="tsep"></span>
-    <button data-fmt="link" title="링크 삽입 (Ctrl+K)" data-i18n-title="%EB%A7%81%ED%81%AC%20%EC%82%BD%EC%9E%85%20(Ctrl%2BK)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6.5 9.5l3-3"/><path d="M7.5 4.5l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7L11.2 8.2"/><path d="M8.5 11.5l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7L4.8 7.8"/></svg></button>
-    <button data-fmt="code" title="인라인 코드 (`…`)" data-i18n-title="%EC%9D%B8%EB%9D%BC%EC%9D%B8%20%EC%BD%94%EB%93%9C%20(%60%E2%80%A6%60)"><span style="font-family:Consolas,monospace;font-size:12px">`c`</span></button>
-    <button data-fmt="codeblock" title="코드 블록 (팝업에서 언어·코드 입력 · 코드 블록 안이면 수정)" data-i18n-title="%EC%BD%94%EB%93%9C%20%EB%B8%94%EB%A1%9D%20(%ED%8C%9D%EC%97%85%EC%97%90%EC%84%9C%20%EC%96%B8%EC%96%B4%C2%B7%EC%BD%94%EB%93%9C%20%EC%9E%85%EB%A0%A5%20%C2%B7%20%EC%BD%94%EB%93%9C%20%EB%B8%94%EB%A1%9D%20%EC%95%88%EC%9D%B4%EB%A9%B4%20%EC%88%98%EC%A0%95)"><span style="font-family:Consolas,monospace;font-size:12px;font-weight:700">{ }</span></button>
-    <button data-fmt="table" aria-haspopup="dialog" aria-expanded="false" aria-controls="tableSizePicker" title="표 (원문·렌더링에서 표 안에 커서를 두면 그 표를 편집)" data-i18n-title="%ED%91%9C%20(%EC%9B%90%EB%AC%B8%C2%B7%EB%A0%8C%EB%8D%94%EB%A7%81%EC%97%90%EC%84%9C%20%ED%91%9C%20%EC%95%88%EC%97%90%20%EC%BB%A4%EC%84%9C%EB%A5%BC%20%EB%91%90%EB%A9%B4%20%EA%B7%B8%20%ED%91%9C%EB%A5%BC%20%ED%8E%B8%EC%A7%91)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2" width="13" height="12" rx="1.5"/><path d="M1.5 6h13M1.5 10h13M6 2v12M10.5 2v12"/></svg></button>
-  </div>
-  <span class="sp"></span>
-  <div id="editorMeta"><span id="status"></span><div class="lang-picker"><button id="langTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="langList">KR</button><div id="langList" role="listbox" aria-label="Language" data-i18n-aria-label="Language" hidden><button type="button" role="option" data-ui-language="ko" aria-selected="false">ko</button><button type="button" role="option" data-ui-language="en" aria-selected="false">en</button><button type="button" role="option" data-ui-language="ja" aria-selected="false">ja</button><button type="button" role="option" data-ui-language="zh" aria-selected="false">zh</button></div></div>
-  <button id="setBtn" title="색 테마·글꼴·문법 설정" data-i18n-title="%EC%83%89%20%ED%85%8C%EB%A7%88%C2%B7%EA%B8%80%EA%BC%B4%C2%B7%EB%AC%B8%EB%B2%95%20%EC%84%A4%EC%A0%95"><span data-i18n="%E2%9A%99%20%EC%84%A4%EC%A0%95">⚙ 설정</span></button>
-  </div>
-  <div id="fileActions">
-  <div class="menu" id="fileMenu">
+<header id="bar" aria-label="편집 도구" data-i18n-aria-label="%ED%8E%B8%EC%A7%91%20%EB%8F%84%EA%B5%AC"><div id="fileActions">  <div class="menu" id="fileMenu">
     <button id="fileBtn" aria-haspopup="true" title="파일 메뉴" data-i18n-title="%ED%8C%8C%EC%9D%BC%20%EB%A9%94%EB%89%B4"><span data-i18n="%ED%8C%8C%EC%9D%BC%20%E2%96%BE">파일 ▾</span></button>
     <div class="mlist" id="fileList" hidden>
       <button data-act="new"><span data-i18n="%EC%83%88%20%EB%AC%B8%EC%84%9C">새 문서</span></button>
@@ -311,22 +279,40 @@
       <button data-act="close"><span data-i18n="%EB%8B%AB%EA%B8%B0">닫기</span></button>
     </div>
   </div>
-  <input type="file" id="fileIn" accept=".md,.markdown,.txt,.html,.htm" hidden>
-  <button id="saveBtn" title="저장 (Ctrl+S)" data-i18n-title="%EC%A0%80%EC%9E%A5%20(Ctrl%2BS)"><span data-i18n="%EC%A0%80%EC%9E%A5">저장</span></button>
-  <button id="closeBtn" title="닫기" data-i18n-title="%EB%8B%AB%EA%B8%B0"><span data-i18n="%E2%9C%95%20%EB%8B%AB%EA%B8%B0">✕ 닫기</span></button>
-  </div>
-</header>
+  <input type="file" id="fileIn" accept=".md,.markdown,.txt,.html,.htm" hidden></div><div id="viewControls"><div class="menu" id="viewMenu"><button id="viewBtn" type="button" data-toolbar-menu="viewList" aria-haspopup="true" aria-expanded="false" aria-controls="viewList"><span data-i18n="%EB%B3%B4%EA%B8%B0">보기</span><span aria-hidden="true"> ▾</span></button><div class="mlist" id="viewList" hidden><button id="tocBtn" class="on" title="왼쪽 목차 접기/펼치기" data-i18n-title="%EC%99%BC%EC%AA%BD%20%EB%AA%A9%EC%B0%A8%20%EC%A0%91%EA%B8%B0%2F%ED%8E%BC%EC%B9%98%EA%B8%B0"><span data-i18n="%E2%98%B0%20%EB%AA%A9%EC%B0%A8">☰ 목차</span></button><hr><div class="seg" id="modes">
+    <button data-mode="md"><span data-i18n="%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4">마크다운</span></button>
+    <button data-mode="outline"><span data-i18n="%EC%95%84%EC%9B%83%EB%9D%BC%EC%9D%B8">아웃라인</span></button>
+    <button data-mode="rendered"><span data-i18n="%EB%A0%8C%EB%8D%94%EB%A7%81">렌더링</span></button>
+    <button data-mode="split"><span data-i18n="%EB%B6%84%ED%95%A0">분할</span></button>
+  </div><hr><div id="viewExtras"></div></div></div></div><div id="tools"><select id="hSel" aria-label="제목" data-i18n-aria-label="%EC%A0%9C%EB%AA%A9" title="제목 단계 (커서가 있는 줄)" data-i18n-title="%EC%A0%9C%EB%AA%A9%20%EB%8B%A8%EA%B3%84%20(%EC%BB%A4%EC%84%9C%EA%B0%80%20%EC%9E%88%EB%8A%94%20%EC%A4%84)">
+      <option value="" data-i18n="%EC%A0%9C%EB%AA%A9">제목</option>
+      <option value="0" data-i18n="%EB%B3%B8%EB%AC%B8">본문</option>
+      <option value="1">H1</option><option value="2">H2</option><option value="3">H3</option>
+      <option value="4">H4</option><option value="5">H5</option><option value="6">H6</option>
+    </select><div class="tool-group" id="emphasisGroup" role="group" aria-label="텍스트 강조" data-i18n-aria-label="%ED%85%8D%EC%8A%A4%ED%8A%B8%20%EA%B0%95%EC%A1%B0"><button type="button" class="group-trigger" data-toolbar-menu="emphasisGroupItems" aria-expanded="false" aria-haspopup="true" aria-controls="emphasisGroupItems" title="텍스트 강조" data-i18n-title="%ED%85%8D%EC%8A%A4%ED%8A%B8%20%EA%B0%95%EC%A1%B0" aria-label="텍스트 강조" data-i18n-aria-label="%ED%85%8D%EC%8A%A4%ED%8A%B8%20%EA%B0%95%EC%A1%B0"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 3h5a3 3 0 010 5H4m0 0h6a2.5 2.5 0 010 5H4zM4 3v5"/></svg></button><div class="tool-items" id="emphasisGroupItems"><button data-fmt="bold" title="굵게 (Ctrl+B)" data-i18n-title="%EA%B5%B5%EA%B2%8C%20(Ctrl%2BB)"><b>B</b></button>
+<button data-fmt="italic" title="기울임 (Ctrl+I)" data-i18n-title="%EA%B8%B0%EC%9A%B8%EC%9E%84%20(Ctrl%2BI)"><i style="font-family:serif">I</i></button>
+<button data-fmt="strike" title="취소선" data-i18n-title="%EC%B7%A8%EC%86%8C%EC%84%A0"><s>S</s></button>
+<button data-fmt="underline" title="밑줄 (Ctrl+U)" data-i18n-title="%EB%B0%91%EC%A4%84%20(Ctrl%2BU)"><u>U</u></button>
+<button data-fmt="highlight" title="하이라이트 (다시 누르면 해제)" data-i18n-title="%ED%95%98%EC%9D%B4%EB%9D%BC%EC%9D%B4%ED%8A%B8%20(%EB%8B%A4%EC%8B%9C%20%EB%88%84%EB%A5%B4%EB%A9%B4%20%ED%95%B4%EC%A0%9C)"><span class="hl-ic">H</span></button>
+<button data-fmt="code" title="인라인 코드 (`…`)" data-i18n-title="%EC%9D%B8%EB%9D%BC%EC%9D%B8%20%EC%BD%94%EB%93%9C%20(%60%E2%80%A6%60)"><span style="font-family:Consolas,monospace;font-size:12px">`c`</span></button></div></div><div class="tool-group" id="listGroup" role="group" aria-label="글머리" data-i18n-aria-label="%EA%B8%80%EB%A8%B8%EB%A6%AC"><button type="button" class="group-trigger" data-toolbar-menu="listGroupItems" aria-expanded="false" aria-haspopup="true" aria-controls="listGroupItems" title="글머리" data-i18n-title="%EA%B8%80%EB%A8%B8%EB%A6%AC" aria-label="글머리" data-i18n-aria-label="%EA%B8%80%EB%A8%B8%EB%A6%AC"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="2" cy="4" r=".8"/><circle cx="2" cy="8" r=".8"/><circle cx="2" cy="12" r=".8"/><path d="M6 4h8M6 8h8M6 12h8"/></svg></button><div class="tool-items" id="listGroupItems"><button data-fmt="ul" title="글머리 기호 (다시 누르면 해제)" data-i18n-title="%EA%B8%80%EB%A8%B8%EB%A6%AC%20%EA%B8%B0%ED%98%B8%20(%EB%8B%A4%EC%8B%9C%20%EB%88%84%EB%A5%B4%EB%A9%B4%20%ED%95%B4%EC%A0%9C)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="2.5" cy="4" r="1" fill="currentColor"/><circle cx="2.5" cy="8" r="1" fill="currentColor"/><circle cx="2.5" cy="12" r="1" fill="currentColor"/><path d="M6 4h8M6 8h8M6 12h8"/></svg></button>
+<button data-fmt="ol" title="번호 매기기 (다시 누르면 해제)" data-i18n-title="%EB%B2%88%ED%98%B8%20%EB%A7%A4%EA%B8%B0%EA%B8%B0%20(%EB%8B%A4%EC%8B%9C%20%EB%88%84%EB%A5%B4%EB%A9%B4%20%ED%95%B4%EC%A0%9C)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><text x="0" y="6" font-size="5.5" fill="currentColor" stroke="none" font-family="sans-serif">1</text><text x="0" y="14" font-size="5.5" fill="currentColor" stroke="none" font-family="sans-serif">2</text><path d="M6 4h8M6 8h8M6 12h8"/></svg></button>
+<button data-fmt="task" title="체크박스 (- [ ] — 다시 누르면 해제)" data-i18n-title="%EC%B2%B4%ED%81%AC%EB%B0%95%EC%8A%A4%20(-%20%5B%20%5D%20%E2%80%94%20%EB%8B%A4%EC%8B%9C%20%EB%88%84%EB%A5%B4%EB%A9%B4%20%ED%95%B4%EC%A0%9C)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="13" height="13" rx="2"/><path d="M4.5 8.2l2.3 2.3 4.7-5"/></svg></button></div></div><div class="tool-group" id="insertGroup" role="group" aria-label="삽입" data-i18n-aria-label="%EC%82%BD%EC%9E%85"><button type="button" class="group-trigger" data-toolbar-menu="insertGroupItems" aria-expanded="false" aria-haspopup="true" aria-controls="insertGroupItems" title="삽입" data-i18n-title="%EC%82%BD%EC%9E%85" aria-label="삽입" data-i18n-aria-label="%EC%82%BD%EC%9E%85"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg></button><div class="tool-items" id="insertGroupItems"><button data-fmt="link" title="링크 삽입 (Ctrl+K)" data-i18n-title="%EB%A7%81%ED%81%AC%20%EC%82%BD%EC%9E%85%20(Ctrl%2BK)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6.5 9.5l3-3"/><path d="M7.5 4.5l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7L11.2 8.2"/><path d="M8.5 11.5l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7L4.8 7.8"/></svg></button>
+<button data-fmt="codeblock" title="코드 블록 (팝업에서 언어·코드 입력 · 코드 블록 안이면 수정)" data-i18n-title="%EC%BD%94%EB%93%9C%20%EB%B8%94%EB%A1%9D%20(%ED%8C%9D%EC%97%85%EC%97%90%EC%84%9C%20%EC%96%B8%EC%96%B4%C2%B7%EC%BD%94%EB%93%9C%20%EC%9E%85%EB%A0%A5%20%C2%B7%20%EC%BD%94%EB%93%9C%20%EB%B8%94%EB%A1%9D%20%EC%95%88%EC%9D%B4%EB%A9%B4%20%EC%88%98%EC%A0%95)"><span style="font-family:Consolas,monospace;font-size:12px;font-weight:700">{ }</span></button>
+<button data-fmt="table" aria-haspopup="dialog" aria-expanded="false" aria-controls="tableSizePicker" title="표 (원문·렌더링에서 표 안에 커서를 두면 그 표를 편집)" data-i18n-title="%ED%91%9C%20(%EC%9B%90%EB%AC%B8%C2%B7%EB%A0%8C%EB%8D%94%EB%A7%81%EC%97%90%EC%84%9C%20%ED%91%9C%20%EC%95%88%EC%97%90%20%EC%BB%A4%EC%84%9C%EB%A5%BC%20%EB%91%90%EB%A9%B4%20%EA%B7%B8%20%ED%91%9C%EB%A5%BC%20%ED%8E%B8%EC%A7%91)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2" width="13" height="12" rx="1.5"/><path d="M1.5 6h13M1.5 10h13M6 2v12M10.5 2v12"/></svg></button></div></div></div><span class="sp"></span><div id="editorMeta"><div class="lang-picker"><button id="langTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="langList">KR</button><div id="langList" role="listbox" aria-label="Language" data-i18n-aria-label="Language" hidden><button type="button" role="option" data-ui-language="ko" aria-selected="false">ko</button><button type="button" role="option" data-ui-language="en" aria-selected="false">en</button><button type="button" role="option" data-ui-language="ja" aria-selected="false">ja</button><button type="button" role="option" data-ui-language="zh" aria-selected="false">zh</button></div></div>
+  <button id="setBtn" title="색 테마·글꼴·문법 설정" data-i18n-title="%EC%83%89%20%ED%85%8C%EB%A7%88%C2%B7%EA%B8%80%EA%BC%B4%C2%B7%EB%AC%B8%EB%B2%95%20%EC%84%A4%EC%A0%95"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2m0 10v2M1 8h2m10 0h2M3 3l1.5 1.5m7 7L13 13M3 13l1.5-1.5m7-7L13 3"/></svg></button>
+  </div><button id="saveBtn" title="저장 (Ctrl+S)" data-i18n-title="%EC%A0%80%EC%9E%A5%20(Ctrl%2BS)"><span data-i18n="%EC%A0%80%EC%9E%A5">저장</span></button></header>
 
 <main id="main" data-mode="split">
   <aside id="toc">
     <div class="hd"><span><span data-i18n="%EB%AA%A9%EC%B0%A8">목차</span></span><button id="tocOpen"><span data-i18n="%EB%AA%A8%EB%91%90%20%ED%8E%BC%EC%B9%98%EA%B8%B0">모두 펼치기</span></button><button id="tocClose"><span data-i18n="%EB%AA%A8%EB%91%90%20%EC%A0%91%EA%B8%B0">모두 접기</span></button></div>
     <div id="tocTree"></div>
   </aside>
-  <section id="srcPane" class="pane"><div class="ptitle"><span class="pane-label"><span data-i18n="%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4%20%EC%9B%90%EB%AC%B8">마크다운 원문</span></span><div class="pane-actions"><button id="srcLn" type="button" aria-pressed="true" title="원문 줄 번호 끄기" data-i18n-title="%EC%9B%90%EB%AC%B8%20%EC%A4%84%20%EB%B2%88%ED%98%B8%20%EB%81%84%EA%B8%B0"><span data-i18n="%EC%A4%84%20%EB%B2%88%ED%98%B8%20On">줄 번호 On</span></button><button type="button" data-copy-pane="src" aria-label="마크다운 원문 복사" data-i18n-aria-label="%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4%20%EC%9B%90%EB%AC%B8%20%EB%B3%B5%EC%82%AC"><span data-i18n="%EB%B3%B5%EC%82%AC">복사</span></button></div></div><div id="src"></div></section>
-  <section id="outPane" class="pane"><div class="ptitle"><span class="pane-label"><span data-i18n="%EC%95%84%EC%9B%83%EB%9D%BC%EC%9D%B8%20%C2%B7%20%ED%81%B4%EB%A6%AD%3A%20%EC%84%A0%ED%83%9D%20%C2%B7%20%EB%8D%94%EB%B8%94%ED%81%B4%EB%A6%AD%2FF2%3A%20%EC%9E%85%EB%A0%A5%20%C2%B7%20Enter%3A%20%EC%95%84%EB%9E%98%20%ED%96%89%20%EC%B6%94%EA%B0%80%20%C2%B7%20Tab%2FShift%2BTab%3A%20%EB%93%A4%EC%97%AC%EC%93%B0%EA%B8%B0%2F%EB%82%B4%EC%96%B4%EC%93%B0%EA%B8%B0%20%C2%B7%20Shift%2BEnter%3A%20%EC%A4%84%EB%B0%94%EA%BF%88%20%C2%B7%20Alt%2B%E2%86%91%E2%86%93%3A%20%EC%9C%84%EC%95%84%EB%9E%98%20%EC%9D%B4%EB%8F%99%20%C2%B7%20%EB%81%8C%EC%96%B4%EC%84%9C%20%EC%9D%B4%EB%8F%99%20%C2%B7%20Delete%3A%20%EC%82%AD%EC%A0%9C%20%C2%B7%20Ctrl%2BZ%2FY%3A%20%EB%90%98%EB%8F%8C%EB%A6%AC%EA%B8%B0%2F%EB%8B%A4%EC%8B%9C">아웃라인 · 클릭: 선택 · 더블클릭/F2: 입력 · Enter: 아래 행 추가 · Tab/Shift+Tab: 들여쓰기/내어쓰기 · Shift+Enter: 줄바꿈 · Alt+↑↓: 위아래 이동 · 끌어서 이동 · Delete: 삭제 · Ctrl+Z/Y: 되돌리기/다시</span></span><div class="pane-actions"><button type="button" data-copy-pane="outline" aria-label="아웃라인 창 내용 복사" data-i18n-aria-label="%EC%95%84%EC%9B%83%EB%9D%BC%EC%9D%B8%20%EC%B0%BD%20%EB%82%B4%EC%9A%A9%20%EB%B3%B5%EC%82%AC"><span data-i18n="%EB%B3%B5%EC%82%AC">복사</span></button></div></div><div id="outline"></div></section>
+  <section id="srcPane" class="pane"><div class="ptitle"><div class="split-left-tools"><button type="button" data-split-left="md" aria-pressed="true" title="MD 창 선택" data-i18n-title="MD%20%EC%B0%BD%20%EC%84%A0%ED%83%9D">MD</button><button type="button" data-split-left="outline" aria-pressed="false" title="아웃라인 창 선택" data-i18n-title="%EC%95%84%EC%9B%83%EB%9D%BC%EC%9D%B8%20%EC%B0%BD%20%EC%84%A0%ED%83%9D"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h12M5 7h9M5 11h9M2 15h12"/></svg></button><button type="button" data-close-left aria-label="왼쪽 창 닫기" title="왼쪽 창 닫기" data-i18n-aria-label="%EC%99%BC%EC%AA%BD%20%EC%B0%BD%20%EB%8B%AB%EA%B8%B0" data-i18n-title="%EC%99%BC%EC%AA%BD%20%EC%B0%BD%20%EB%8B%AB%EA%B8%B0"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div><span class="pane-label"><span data-i18n="%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4%20%EC%9B%90%EB%AC%B8">마크다운 원문</span></span><div class="pane-actions"><button id="srcLn" type="button" aria-pressed="true" title="원문 줄 번호 끄기" data-i18n-title="%EC%9B%90%EB%AC%B8%20%EC%A4%84%20%EB%B2%88%ED%98%B8%20%EB%81%84%EA%B8%B0"><span data-i18n="%EC%A4%84%20%EB%B2%88%ED%98%B8%20On">줄 번호 On</span></button><button type="button" data-copy-pane="src" aria-label="마크다운 원문 복사" data-i18n-aria-label="%EB%A7%88%ED%81%AC%EB%8B%A4%EC%9A%B4%20%EC%9B%90%EB%AC%B8%20%EB%B3%B5%EC%82%AC"><span data-i18n="%EB%B3%B5%EC%82%AC">복사</span></button></div></div><div id="src"></div></section>
+  <section id="outPane" class="pane"><div class="ptitle"><div class="split-left-tools"><button type="button" data-split-left="md" aria-pressed="true" title="MD 창 선택" data-i18n-title="MD%20%EC%B0%BD%20%EC%84%A0%ED%83%9D">MD</button><button type="button" data-split-left="outline" aria-pressed="false" title="아웃라인 창 선택" data-i18n-title="%EC%95%84%EC%9B%83%EB%9D%BC%EC%9D%B8%20%EC%B0%BD%20%EC%84%A0%ED%83%9D"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3h12M5 7h9M5 11h9M2 15h12"/></svg></button><button type="button" data-close-left aria-label="왼쪽 창 닫기" title="왼쪽 창 닫기" data-i18n-aria-label="%EC%99%BC%EC%AA%BD%20%EC%B0%BD%20%EB%8B%AB%EA%B8%B0" data-i18n-title="%EC%99%BC%EC%AA%BD%20%EC%B0%BD%20%EB%8B%AB%EA%B8%B0"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div><span class="pane-label"><span data-i18n="%EC%95%84%EC%9B%83%EB%9D%BC%EC%9D%B8%20%C2%B7%20%ED%81%B4%EB%A6%AD%3A%20%EC%84%A0%ED%83%9D%20%C2%B7%20%EB%8D%94%EB%B8%94%ED%81%B4%EB%A6%AD%2FF2%3A%20%EC%9E%85%EB%A0%A5%20%C2%B7%20Enter%3A%20%EC%95%84%EB%9E%98%20%ED%96%89%20%EC%B6%94%EA%B0%80%20%C2%B7%20Tab%2FShift%2BTab%3A%20%EB%93%A4%EC%97%AC%EC%93%B0%EA%B8%B0%2F%EB%82%B4%EC%96%B4%EC%93%B0%EA%B8%B0%20%C2%B7%20Shift%2BEnter%3A%20%EC%A4%84%EB%B0%94%EA%BF%88%20%C2%B7%20Alt%2B%E2%86%91%E2%86%93%3A%20%EC%9C%84%EC%95%84%EB%9E%98%20%EC%9D%B4%EB%8F%99%20%C2%B7%20%EB%81%8C%EC%96%B4%EC%84%9C%20%EC%9D%B4%EB%8F%99%20%C2%B7%20Delete%3A%20%EC%82%AD%EC%A0%9C%20%C2%B7%20Ctrl%2BZ%2FY%3A%20%EB%90%98%EB%8F%8C%EB%A6%AC%EA%B8%B0%2F%EB%8B%A4%EC%8B%9C">아웃라인 · 클릭: 선택 · 더블클릭/F2: 입력 · Enter: 아래 행 추가 · Tab/Shift+Tab: 들여쓰기/내어쓰기 · Shift+Enter: 줄바꿈 · Alt+↑↓: 위아래 이동 · 끌어서 이동 · Delete: 삭제 · Ctrl+Z/Y: 되돌리기/다시</span></span><div class="pane-actions"><button type="button" data-copy-pane="outline" aria-label="아웃라인 창 내용 복사" data-i18n-aria-label="%EC%95%84%EC%9B%83%EB%9D%BC%EC%9D%B8%20%EC%B0%BD%20%EB%82%B4%EC%9A%A9%20%EB%B3%B5%EC%82%AC"><span data-i18n="%EB%B3%B5%EC%82%AC">복사</span></button></div></div><div id="outline"></div></section>
   <div id="splitter" title="끌어서 좌우 크기 조절 · 더블클릭: 반반" data-i18n-title="%EB%81%8C%EC%96%B4%EC%84%9C%20%EC%A2%8C%EC%9A%B0%20%ED%81%AC%EA%B8%B0%20%EC%A1%B0%EC%A0%88%20%C2%B7%20%EB%8D%94%EB%B8%94%ED%81%B4%EB%A6%AD%3A%20%EB%B0%98%EB%B0%98"></div>
   <section id="wwPane" class="pane"><div class="ptitle"><span class="pane-label"><span data-i18n="%EB%A0%8C%EB%8D%94%EB%A7%81%20(%EC%A7%81%EC%A0%91%20%ED%8E%B8%EC%A7%91%20%EA%B0%80%EB%8A%A5)">렌더링 (직접 편집 가능)</span></span><div class="pane-actions"><button type="button" data-copy-pane="ww" aria-label="렌더링 창 내용 복사" data-i18n-aria-label="%EB%A0%8C%EB%8D%94%EB%A7%81%20%EC%B0%BD%20%EB%82%B4%EC%9A%A9%20%EB%B3%B5%EC%82%AC"><span data-i18n="%EB%B3%B5%EC%82%AC">복사</span></button></div></div><div class="link-help"><span data-i18n="%EB%A7%81%ED%81%AC%3A%20%ED%81%B4%EB%A6%AD%ED%95%98%EC%97%AC%20%EC%83%88%20%ED%83%AD%20%EC%97%B4%EA%B8%B0%20%C2%B7%20%ED%8E%B8%EC%A7%91%20%EC%A4%91%EC%97%90%EB%8A%94%20Ctrl%2FCmd%2B%ED%81%B4%EB%A6%AD">링크: 클릭하여 새 탭 열기 · 편집 중에는 Ctrl/Cmd+클릭</span></div><div id="ww"></div></section>
 </main>
+<footer id="editorStatus"><span id="status" role="status" aria-live="off"></span></footer>
 <div id="paneCopyStatus" class="pane-copy-status" role="status" aria-live="polite"></div>
 
 <div id="tableSizePicker" role="dialog" aria-label="표 삽입" data-i18n-aria-label="%ED%91%9C%20%EC%82%BD%EC%9E%85" hidden>
@@ -659,6 +645,7 @@ function urlLanguage() { return normalizeLanguage(QS.get('lang')) || normalizeLa
 function inheritedLanguage() { if(!EMM)return null;for(const w of [window.opener,window.parent!==window?window.parent:null]){try{if(w&&w.location.origin===location.origin){const l=normalizeLanguage(w.document.documentElement.lang);if(l)return l;}}catch{}}return storedLanguage('emm.lang'); }
 let uiLang = urlLanguage() || inheritedLanguage() || storedLanguage('mde.lang') || (navigator.languages||[navigator.language]).map(normalizeLanguage).find(Boolean) || 'ko';
 let manualLanguage=false;
+for(const [lang,labels] of Object.entries({"en":{"보기":"View","텍스트 강조":"Text formatting","글머리":"Lists","삽입":"Insert","편집 도구":"Editing toolbar","MD 창 선택":"Show Markdown on the left","아웃라인 창 선택":"Show outline on the left","왼쪽 창 닫기":"Close left pane","굵게":"Bold","기울임":"Italic","인라인 코드":"Inline code","글머리 기호":"Bulleted list","번호 매기기":"Numbered list","체크박스":"Checklist","링크":"Link","코드 블록":"Code block","하이라이트":"Highlight"},"ja":{"보기":"表示","텍스트 강조":"文字の装飾","글머리":"リスト","삽입":"挿入","편집 도구":"編集ツールバー","MD 창 선택":"左にMarkdownを表示","아웃라인 창 선택":"左にアウトラインを表示","왼쪽 창 닫기":"左ペインを閉じる","굵게":"太字","기울임":"斜体","인라인 코드":"インラインコード","글머리 기호":"箇条書き","번호 매기기":"番号付きリスト","체크박스":"チェックリスト","링크":"リンク","코드 블록":"コードブロック","하이라이트":"ハイライト"},"zh":{"보기":"视图","텍스트 강조":"文本格式","글머리":"列表","삽입":"插入","편집 도구":"编辑工具栏","MD 창 선택":"左侧显示Markdown","아웃라인 창 선택":"左侧显示大纲","왼쪽 창 닫기":"关闭左侧窗格","굵게":"加粗","기울임":"斜体","인라인 코드":"行内代码","글머리 기호":"项目符号","번호 매기기":"编号列表","체크박스":"任务列表","링크":"链接","코드 블록":"代码块","하이라이트":"高亮"}}))Object.assign(I18N[lang],labels);
 function tr(key,vars) { let s=I18N[uiLang][key] ?? I18N.ko[key] ?? key;for(const [k,v] of Object.entries(vars||{}))s=s.split('{'+k+'}').join(String(v));return s; }
 function toastLocale(){return {ko:'ko-KR',en:'en-US',ja:'ja-JP',zh:'zh-CN'}[uiLang];}
 function applyUiLanguage(){
@@ -667,6 +654,7 @@ function applyUiLanguage(){
   document.querySelectorAll('[data-i18n]').forEach(e=>{if(isUi(e))e.textContent=tr(decodeURIComponent(e.dataset.i18n));});
   for(const a of ['title','placeholder','aria-label'])document.querySelectorAll('[data-i18n-'+a+']').forEach(e=>{if(isUi(e))e.setAttribute(a,tr(decodeURIComponent(e.getAttribute('data-i18n-'+a))));});
   updateSaveControls(); updateTableSizeLabels();
+  responsiveToolbar();
   updateLanguagePicker(); const field=$('#sUiLanguage'); if(field)field.value=uiLang; const ln=$('#cLn'); if(ln)ln.title=tr(codeLn?'줄 번호 끄기':'줄 번호 켜기');
 }
 function setLanguage(value,persist=true){const next=normalizeLanguage(value);if(!next)return false;if(persist){manualLanguage=true;try{SAFE_STORAGE.setItem('mde.lang',next);}catch{}try{const u=new URL(location.href);u.searchParams.set('lang',next);u.searchParams.delete('locale');history.replaceState(history.state,'',u);}catch{}}if(next===uiLang){applyUiLanguage();return true;}
@@ -757,6 +745,7 @@ graph LR
 
 let md = EMM ? "" : EMBEDDED ? EMB.value : IS_IFRAME ? "" : (SAFE_STORAGE.getItem("mde.md") ?? SAMPLE);
 let mode = SAFE_STORAGE.getItem("mde.mode") || "split";
+let splitLeft = "md";
 let lastFocus = "src";
 let wwFocused = false;
 let wwStale = false;
@@ -1137,7 +1126,7 @@ function splitViewportPosition(map,view,y) {
 }
 
 function followSplitPane(pane,kind) {
-  if(mode!=="split"||splitFollow.applying)return;
+  if(mode!=="split"||splitLeft!=="md"||splitFollow.applying)return;
   const container=ed.wwEditor.view.dom, view=ed.wwEditor.view;
   if(!container?.clientHeight || !cm.getScrollInfo().clientHeight)return;
   const sourceRect=cm.getWrapperElement().getBoundingClientRect(), targetRect=container.getBoundingClientRect();
@@ -1172,7 +1161,7 @@ function followSplitPane(pane,kind) {
   }
 }
 function requestSplitFollow(pane,kind="scroll") {
-  if(mode!=="split"||splitFollow.applying)return;
+  if(mode!=="split"||splitLeft!=="md"||splitFollow.applying)return;
   if(kind==="selection"){splitFollow.selectionPane=pane;splitFollow.selectionUntil=Date.now()+220;}
   else if(splitFollow.selectionPane===pane&&Date.now()<splitFollow.selectionUntil)kind="selection";
   splitFollow.last=pane;
@@ -1180,7 +1169,7 @@ function requestSplitFollow(pane,kind="scroll") {
   splitFollow.pending={pane,kind};
   if(splitFollow.timer)return;
   const run=()=>{
-    splitFollow.timer=0;if(mode!=="split"){splitFollow.pending=null;return;}
+    splitFollow.timer=0;if(mode!=="split"||splitLeft!=="md"){splitFollow.pending=null;return;}
     if(tSrc||tWw||wwStale){splitFollow.timer=setTimeout(run,80);return;}
     const pending=splitFollow.pending;splitFollow.pending=null;
     if(pending)followSplitPane(pending.pane,pending.kind);
@@ -1188,7 +1177,7 @@ function requestSplitFollow(pane,kind="scroll") {
   splitFollow.timer=-1;queueMicrotask(run);
 }
 function splitScrollChanged(pane) {
-  if(mode!=="split"||splitFollow.applying)return;
+  if(mode!=="split"||splitLeft!=="md"||splitFollow.applying)return;
   const top=pane==="src"?cm.getScrollInfo().top:ed.wwEditor.view.dom.scrollTop;
   if(splitFollow.expected[pane]!==null&&Math.abs(top-splitFollow.expected[pane])<1)return;
   splitFollow.expected[pane]=null;requestSplitFollow(pane);
@@ -1218,6 +1207,7 @@ window.addEventListener("resize",()=>requestSplitFollow(splitFollow.last));
 let tSrc = 0, tWw = 0, tPost = 0;
 let latestEditSource = "src";
 const wwVisible = () => mode === "rendered" || mode === "split";
+const outlineVisible = () => mode === "outline" || (mode === "split" && splitLeft === "outline");
 
 cm.on("focus", () => { lastFocus = "src"; updStatus(); });
 cm.on("change", () => {
@@ -1288,7 +1278,7 @@ function setAll(text, origin) {
 }
 function afterChange() {
   renderToc();
-  if (mode === "outline") renderOutline();
+  if (outlineVisible()) renderOutline();
   if (!PROTECTED_DOCUMENT && !EMBEDDED && !EMM && !IS_IFRAME) SAFE_STORAGE.setItem("mde.md", md);
   updStatus();
   clearTimeout(tPost);
@@ -1297,17 +1287,21 @@ function afterChange() {
 
 /* ---------- modes ---------- */
 function setMode(m) {
+  if(document.activeElement?.closest("#outline")&&document.activeElement.isContentEditable)document.activeElement.blur();
+  flushPendingEdits();
   mode = m;
+  $("#main").dataset.left = splitLeft;
   $("#main").dataset.mode = m;
   SAFE_STORAGE.setItem("mde.mode", m);
   document.querySelectorAll("#modes button").forEach((b) => b.classList.toggle("on", b.dataset.mode === m));
   if (wwVisible() && wwStale) pushToWw();
-  if (m === "outline") renderOutline();
+  if (m === "outline" || (m === "split" && splitLeft === "outline")) renderOutline();
   if (m === "md" || m === "split") setTimeout(() => cm.refresh(), 0);
   const fmtOff = m === "outline";
   document.querySelectorAll("#tools button, #tools select").forEach((b) => (b.disabled = fmtOff));
   updStatus();
-  if(m==="split")setTimeout(()=>requestSplitFollow(lastFocus),0);
+  if(m==="split"&&splitLeft==="md")setTimeout(()=>requestSplitFollow(lastFocus),0);
+  closeToolbarMenus();
 }
 document.querySelectorAll("#modes button").forEach((b) => (b.onclick = () => setMode(b.dataset.mode)));
 $("#tocBtn").onclick = () => { $("#toc").classList.toggle("off"); $("#tocBtn").classList.toggle("on"); setTimeout(() => cm.refresh(), 0); };
@@ -1315,7 +1309,7 @@ $("#tocBtn").onclick = () => { $("#toc").classList.toggle("off"); $("#tocBtn").c
 function target() {
   if (mode === "md" || mode === "outline") return "src";
   if (mode === "rendered") return "ww";
-  return lastFocus;
+  return splitLeft === "outline" ? "ww" : lastFocus;
 }
 function updStatus() {
   const t = mode === "outline" ? tr("아웃라인") : target() === "src" ? tr("원문") : tr("렌더링");
@@ -1393,7 +1387,7 @@ function toggleListLines(lines, kind, prevLine) {
   let n = 0;
   if (kind === "ol" && prevLine) { const pm = prevLine.match(/^(\s*)(\d+)[.)]\s/); const im = (lines[0].match(/^\s*/) || [""])[0]; if (pm && pm[1] === im) n = Number(pm[2]); }
   return lines.map((L) => {
-    if (!L.trim()) return L;
+    if (!L.trim() && lines.length > 1) return L;
     const m = L.match(RE), ind = m ? m[1] : (L.match(/^\s*/) || [""])[0], body = m ? L.slice(m[0].length) : L.slice(ind.length);
     if (all) return ind + body;
     if (kind === "ul") return ind + "- " + body;
@@ -1402,6 +1396,17 @@ function toggleListLines(lines, kind, prevLine) {
   });
 }
 function wwList(kind) {
+  wwRestore();
+  const view=ed.wwEditor.view, selection=view.state.selection;
+  if(selection.empty && !selection.$from.parent.textContent && selection.$from.parent.type.name === "paragraph") {
+    let current=null;
+    for(let depth=selection.$from.depth;depth>0;depth--){const node=selection.$from.node(depth);if(node.type.name==="listItem"){current=node.attrs.task?"task":selection.$from.node(depth-1).type.name==="orderedList"?"ol":"ul";break;}}
+    if(current===kind){
+      // Native outdent preserves the caret and removes the empty list item.
+      for(let pass=0;pass<selection.$from.depth;pass++){const s=view.state.selection;let inList=false;for(let depth=s.$from.depth;depth>0;depth--)if(s.$from.node(depth).type.name==="listItem")inList=true;if(!inList)break;const before=view.state.doc;wwExec("outdent");if(view.state.doc.eq(before))break;}
+    }else wwExec(WW_CMD[kind]);
+    return;
+  }
   wwUserOp = true;
   let s = 0, e = 0;
   try {
@@ -1626,8 +1631,8 @@ function renderToc() {
   walk(root.children, box);
 }
 function allHeads() { return parseBlocks(md).filter((b) => b.type === "h"); }
-$("#tocOpen").onclick = () => { tocFold.clear(); outFold.clear(); renderToc(); if (mode === "outline") renderOutline(); };
-$("#tocClose").onclick = () => { allHeads().forEach((h) => { tocFold.add(h.key); outFold.add(h.key); }); renderToc(); if (mode === "outline") renderOutline(); };
+$("#tocOpen").onclick = () => { tocFold.clear(); outFold.clear(); renderToc(); if (outlineVisible()) renderOutline(); };
+$("#tocClose").onclick = () => { allHeads().forEach((h) => { tocFold.add(h.key); outFold.add(h.key); }); renderToc(); if (outlineVisible()) renderOutline(); };
 
 function jump(h) {
   if (mode === "outline") {
@@ -2364,7 +2369,7 @@ $("#sTheme").onchange = () => { S.theme = $("#sTheme").value; saveSettings(); ap
 $("#sApp").onchange = () => { S.appDark = $("#sApp").checked; saveSettings(); applySettings(); };
 $("#sFont").onchange = () => { S.fontSize = Math.min(24, Math.max(11, Number($("#sFont").value) || 14)); saveSettings(); applySettings(); };
 $("#sWrap").onchange = () => { S.wrap = $("#sWrap").checked; saveSettings(); applySettings(); };
-document.querySelectorAll('input[name="sSyn"]').forEach((r) => (r.onchange = () => { S.syntax = r.value; saveSettings(); pushToWw(); if (mode === "outline") renderOutline(); }));
+document.querySelectorAll('input[name="sSyn"]').forEach((r) => (r.onchange = () => { S.syntax = r.value; saveSettings(); pushToWw(); if (outlineVisible()) renderOutline(); }));
 $("#sReset").onclick = () => { S.custom = {}; saveSettings(); applySettings(); drawSettings(); };
 
 
@@ -2546,6 +2551,7 @@ async function doOpen() {
 $("#fileIn").onchange = async (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) loadFile(f, null); };
 function newDoc(text, name) { exportDocumentEpoch++; const keepProtected = PROTECTED_DOCUMENT || ISOLATED_PROTECTED; PROTECTED_DOCUMENT = keepProtected; fileName = name; DOC.handle = null; DOC.kind = keepProtected ? "encrypted" : "md"; DOC.fileBound = keepProtected; setAll(text, "file"); DOC.saved = md; updStatus(); }
 function doClose() {
+  flushPendingEdits();
   if (isDirty() && !confirm(tr("저장하지 않은 변경이 있습니다. 저장하지 않고 닫을까요?"))) return;
   DOC.saved = md;
   if (ISOLATED_PROTECTED) { window.parent.postMessage({type:"mdeenc:lock"},"*"); return; }
@@ -2568,7 +2574,19 @@ $("#fileBtn").onclick = (e) => { e.stopPropagation(); $("#fileList").hidden = !$
 $("#fileList").addEventListener("click", (e) => { const b = e.target.closest("[data-act]"); if (!b) return; $("#fileList").hidden = true; ACTS[b.dataset.act](); });
 document.addEventListener("click", (e) => { if (!e.target.closest("#fileMenu")) $("#fileList").hidden = true; });
 $("#saveBtn").onclick = doSave;
-$("#closeBtn").onclick = doClose;
+
+/* Shared toolbar: a single set of actions, preserving the editor selection. */
+function closeToolbarMenus(except=null){let restore=null;document.querySelectorAll('[data-toolbar-menu]').forEach(b=>{const panel=document.getElementById(b.dataset.toolbarMenu);const open=b===except;if(!open&&panel.contains(document.activeElement))restore=b;b.setAttribute('aria-expanded',String(open));if(panel.classList.contains('tool-items'))b.closest('.tool-group').dataset.open=String(open);else panel.hidden=!open;});restore?.focus({preventScroll:true});}
+function positionToolbarMenu(button,panel){const r=button.getBoundingClientRect();panel.style.left=Math.max(8,Math.min(r.left,innerWidth-panel.offsetWidth-8))+'px';panel.style.top=Math.max(4,Math.min(r.bottom+5,innerHeight-panel.offsetHeight-8))+'px';}
+function responsiveToolbar(){if(!document.getElementById('viewExtras'))return;const small=innerWidth<=520;for(const node of [document.querySelector('.lang-picker'),document.getElementById('setBtn')])if(node)(small?$('#viewExtras'):$('#editorMeta')).append(node);const first=$('#hSel').options[0];first.textContent=small?'H':tr('제목');}
+function initToolbar(){const captions={bold:'굵게',italic:'기울임',strike:'취소선',underline:'밑줄',highlight:'하이라이트',code:'인라인 코드',ul:'글머리 기호',ol:'번호 매기기',task:'체크박스',link:'링크',codeblock:'코드 블록',table:'표'};for(const b of document.querySelectorAll('[data-fmt]')){const span=document.createElement('span');span.className='tool-caption';span.dataset.i18n=encodeURIComponent(captions[b.dataset.fmt]);span.textContent=tr(captions[b.dataset.fmt]);b.append(span);b.setAttribute('aria-label',tr(captions[b.dataset.fmt]));b.dataset.i18nAriaLabel=encodeURIComponent(captions[b.dataset.fmt]);}
+$('#fileBtn').dataset.toolbarMenu='fileList';$('#fileBtn').setAttribute('aria-controls','fileList');$('#fileBtn').setAttribute('aria-expanded','false');
+for(const b of document.querySelectorAll('[data-toolbar-menu]')){b.onclick=e=>{e.stopPropagation();const was=b.getAttribute('aria-expanded')==='true';closeToolbarMenus(was?null:b);if(!was)positionToolbarMenu(b,document.getElementById(b.dataset.toolbarMenu));};b.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();closeToolbarMenus(b);const p=document.getElementById(b.dataset.toolbarMenu);positionToolbarMenu(b,p);p.querySelector('button:not(:disabled),select:not(:disabled)')?.focus();}});}
+for(const b of document.querySelectorAll('[data-split-left]'))b.onclick=()=>setSplitLeft(b.dataset.splitLeft);for(const b of document.querySelectorAll('[data-close-left]'))b.onclick=()=>setMode('rendered');
+document.addEventListener('click',e=>{if(!e.target.closest('#fileMenu,#viewMenu,.tool-group'))closeToolbarMenus();else if(e.target.closest('[data-fmt],[data-act],#modes button,#tocBtn,#setBtn'))closeToolbarMenus();});document.addEventListener('keydown',e=>{const trigger=[...document.querySelectorAll('[data-toolbar-menu]')].find(b=>b.getAttribute('aria-expanded')==='true');if(!trigger)return;const panel=document.getElementById(trigger.dataset.toolbarMenu);if(e.key==='Escape'){e.preventDefault();closeToolbarMenus();trigger.focus();return;}if(!panel.contains(e.target)||!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();const items=[...panel.querySelectorAll('button:not(:disabled),select:not(:disabled)')].filter(b=>b.getClientRects().length);const at=items.indexOf(document.activeElement);items[e.key==='Home'?0:e.key==='End'?items.length-1:(at+(e.key==='ArrowUp'?-1:1)+items.length)%items.length]?.focus();});window.addEventListener('resize',()=>{closeToolbarMenus();responsiveToolbar();});responsiveToolbar();}
+function setSplitLeft(next){if(!['md','outline'].includes(next))return;if(document.activeElement?.closest('#outline')&&document.activeElement.isContentEditable)document.activeElement.blur();flushPendingEdits();clearTimeout(splitFollow.timer);splitFollow.timer=0;splitFollow.pending=null;splitLeft=next;lastFocus=next==='md'?'src':'ww';$('#main').dataset.left=next;document.querySelectorAll('[data-split-left]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.splitLeft===next)));if(next==='outline')renderOutline();else setTimeout(()=>cm.refresh(),0);updStatus();}
+initToolbar();
+
 window.addEventListener("keydown", (e) => {
   if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
   const k = e.key.toLowerCase();
@@ -2669,7 +2687,7 @@ window.addEventListener("message", (e) => {
   } else if (d.type === "mde:get") postToParent({ type: "mde:markdown", id: d.id, markdown: md });
   else if (d.type === "mde:mode" && ["md", "outline", "rendered", "split"].includes(d.mode)) setMode(d.mode);
 });
-window.MDE = { openCode, openLink, fmt, settings: S, applySettings, outline: { get O() { return curO; }, get sel() { return selLine; }, nodeAt: (l) => nodeAt(curO, l), doMove, opIndent, opOutdent, opAdd, opDelete, undo, redo }, cm, get ed() { return ed; }, getLanguage: () => uiLang, setLanguage, getLocale: () => uiLang, setLocale: setLanguage, get markdown() { return md; }, setMarkdown: (t) => setAll(t, "api"), setMode, openTable };
+window.MDE = { setSplitLeft, get splitLeft(){return splitLeft;}, openCode, openLink, fmt, settings: S, applySettings, outline: { get O() { return curO; }, get sel() { return selLine; }, nodeAt: (l) => nodeAt(curO, l), doMove, opIndent, opOutdent, opAdd, opDelete, undo, redo }, cm, get ed() { return ed; }, getLanguage: () => uiLang, setLanguage, getLocale: () => uiLang, setLocale: setLanguage, get markdown() { return md; }, setMarkdown: (t) => setAll(t, "api"), setMode, openTable };
 
 $('#langTrigger').onclick=()=>{const open=$('#langList').hidden;$('#langList').hidden=!open;$('#langTrigger').setAttribute('aria-expanded',String(open));if(open)document.querySelector('[data-ui-language="'+uiLang+'"]').focus();};document.querySelectorAll('[data-ui-language]').forEach(b=>b.onclick=()=>{setLanguage(b.dataset.uiLanguage);closeLanguagePicker();$('#langTrigger').focus();});document.addEventListener('pointerdown',e=>{if(!e.target.closest('.lang-picker'))closeLanguagePicker();});$('.lang-picker').addEventListener('keydown',e=>{const items=[...document.querySelectorAll('[data-ui-language]')];if(e.key==='Escape'){closeLanguagePicker();$('#langTrigger').focus();}else if(e.key==='Tab')closeLanguagePicker();else if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();$('#langList').hidden=false;$('#langTrigger').setAttribute('aria-expanded','true');let i=items.indexOf(document.activeElement);i=e.key==='Home'?0:e.key==='End'?3:(i+(e.key==='ArrowDown'?1:3)+4)%4;items[i].focus();}});
 
