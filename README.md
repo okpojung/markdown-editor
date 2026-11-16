@@ -103,7 +103,7 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 
 ## 설치 파일 다운로드
 
-[홈페이지 다운로드](https://md-editor.baro.me/#download)와 [GitHub Release v1.0.6](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.6)에서 Windows x64, macOS Intel/Apple Silicon, Linux x64 DEB/AppImage를 선택합니다. `SHA256SUMS.txt`는 설치 파일 5종을 검증합니다.
+[홈페이지 다운로드](https://md-editor.baro.me/#download)와 [GitHub Release v1.0.7](https://github.com/okpojung/markdown-editor/releases/tag/v1.0.7)에서 Windows x64, macOS Intel/Apple Silicon, Linux x64 DEB/AppImage를 선택합니다. `SHA256SUMS.txt`는 설치 파일 5종을 검증합니다.
 
 [검증한 빌드 소스](https://github.com/okpojung/markdown-editor/commit/ed82e81e42c4ced80625e6b8348a7dbbfae7239a)와 [4플랫폼 CI](https://github.com/okpojung/markdown-editor/actions/runs/43666040985). 각 설치 앱에서 도구막대 152개·분할 동기화 60개·표 격자 52개·기존 표/코드 34개·암호화 내보내기 24개와 실제 네이티브 암호문 파일 왕복 검사를 통과했습니다. [게시 준비 검증](https://github.com/okpojung/markdown-editor/actions/runs/43666914937)은 main 전체 tree 일치, 설치 파일 5종의 바이트 수·SHA-256 및 설치 증거를 확인했습니다. Windows 별도 표준 계정 로그인은 미검증이며 Windows Authenticode와 macOS Developer ID 서명·공증은 미완료입니다. AppImage FUSE 실구동과 EMM 운영 사본 반영은 별도 확인 대상입니다.
 
@@ -121,3 +121,8 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 ## 1.0.6 반응형 도구막대
 
 파일·보기 우선의 한 줄 메뉴, 작은 화면 그룹 아이콘, 분할 왼쪽 MD/아웃라인 전환과 닫기, 입력 전 목록 토글을 제공합니다. 자세한 변경과 검증 계약은 [도구막대 안내](docs/toolbar-1.0.6.md)를 참고하세요.
+
+
+## 1.0.7 아웃라인 도구·양방향 분할 동기화
+
+아웃라인에서도 같은 편집 도구를 선택 항목·문자 범위에 적용합니다. 아웃라인/렌더링 분할의 스크롤과 항목 위치를 서로 맞추고 반대쪽 커서·선택·접힘은 보존합니다. 포커스에 의존하지 않는 저장 전 입력 확정과 줄바꿈 보존을 포함하며 4언어 합성 검사 270개를 설치 실행·릴리스의 필수 조건으로 확인합니다. [사용 안내](docs/outline-tools.md). EMM 앱 사본·실서버 저장·운영 반영은 별도 담당의 검증 범위입니다.
