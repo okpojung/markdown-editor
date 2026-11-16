@@ -60,10 +60,12 @@ async function runDesktopSmoke(meta) {
   tests.splitScrollBrowser=splitScrollBrowser?.passed===true;
   const toolbarBrowser=await runToolbarRegression();
   tests.toolbarBrowser=toolbarBrowser?.passed===true;
+  const outlineBrowser=await runOutlineRegression();
+  tests.outlineBrowser=outlineBrowser?.passed===true;
   const protectedExportBrowser=await runProtectedExportRegression(window.desktopMakeHandle(meta));
   tests.protectedExportBrowser=protectedExportBrowser?.passed===true;
   tests.nativeEncryptedFileRoundtrip=protectedExportBrowser?.nativeFileRoundtrip===true;
   drawSettings();$('#sdlg').hidden=false;
   await new Promise(r=>setTimeout(r,800));
-  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,renderedTailBrowser,tableGridBrowser,toolbarBrowser,splitScrollBrowser,protectedExportBrowser,uiLanguages:4,nativeFileRoundtrip:true});
+  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,renderedTailBrowser,tableGridBrowser,toolbarBrowser,splitScrollBrowser,protectedExportBrowser,uiLanguages:4,nativeFileRoundtrip:true,outlineBrowser});
 }
