@@ -1336,7 +1336,7 @@ function updStatus() {
 function outlineToolTarget(){return mode==='outline'||(mode==='split'&&splitLeft==='outline'&&lastFocus==='outline');}
 function outlineBodyPrefix(n,line){if(!n)return 0;if(n.type==='h')return (line.match(/^#{1,6}\s+/)||[''])[0].length;if(n.type==='li')return n.prefixLen||0;if(n.type==='quote')return (line.match(/^\s*>\s?/)||[''])[0].length;return 0;}
 function captureOutlineBookmark(){
- const tx=document.activeElement;if(!tx?.isContentEditable||!tx.closest('#outline'))return outlineBookmark;
+ const tx=$('#outline .tx[contenteditable="true"]');if(!tx)return outlineBookmark;
  const selection=getSelection();if(!selection?.rangeCount)return outlineBookmark;const range=selection.getRangeAt(0);if(!tx.contains(range.startContainer)||!tx.contains(range.endContainer))return outlineBookmark;
  let a='\u2063\u2061\u2063',b='\u2061\u2063\u2061';while(tx.textContent.includes(a)||tx.textContent.includes(b)){a+='\u2060';b+='\u2060';}
  const end=document.createTextNode(b),start=document.createTextNode(a),re=range.cloneRange(),rs=range.cloneRange();re.collapse(false);rs.collapse(true);
@@ -2018,6 +2018,7 @@ function startEdit(row, tx, n, raw, multi, isNew) {
       if (!ok) { pendingSel = { line: selLine, edit: true }; renderOutline(); }
     } else if (!changed) renderOutline();
   };
+  tx._commitOutline=()=>finish("save");
   tx.onkeydown = (k) => {
     k.stopPropagation(); // keys typed while editing must not reach the outline-level shortcuts
     if (k.isComposing) return; // Korean IME
@@ -2530,7 +2531,7 @@ async function buildHtml(offline = true, options = {}) {
 }
 
 function flushPendingEdits() {
-  const outlineInput=document.activeElement;if(outlineInput?.isContentEditable&&outlineInput.closest("#outline"))outlineInput.blur();
+  const outlineInput=$('#outline .tx[contenteditable="true"]');if(outlineInput){outlineInput._commitOutline?.();if(outlineInput.isConnected)outlineInput.blur();}
   const source = !!tSrc, rendered = !!tWw;
   clearTimeout(tSrc); clearTimeout(tWw); tSrc = tWw = 0;
   if (rendered && latestEditSource === "ww") {
