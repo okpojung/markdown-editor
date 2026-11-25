@@ -36,7 +36,8 @@ const exec=(command,args)=>new Promise((resolve,reject)=>{const p=cp.spawn(comma
   await fs.copyFile(output,path.join(root,'proof/smoke-installed.json'));
   try{await fs.copyFile(output.replace(/\.json$/,'.png'),path.join(root,'proof/smoke-installed.png'));}catch{}
   const metadata=[];
-  for(const file of files){const b=await fs.readFile(path.join(release,file));metadata.push({file,bytes:b.length,sha256:crypto.createHash('sha256').update(b).digest('hex')});}
+  const published=process.platform==='win32'?[...files,'latest.yml']:files;
+  for(const file of published){const b=await fs.readFile(path.join(release,file));metadata.push({file,bytes:b.length,sha256:crypto.createHash('sha256').update(b).digest('hex')});}
   const source=await fs.readFile(path.join(root,'..','index.html'));
   const lock=await fs.readFile(path.join(root,'package-lock.json'));
   const proof={sourceCommit:process.env.GITHUB_SHA||null,runId:process.env.GITHUB_RUN_ID||null,runAttempt:process.env.GITHUB_RUN_ATTEMPT||null,platform:process.platform,arch:process.arch,electron:report.electron,appVersion:report.appVersion,installedSmokePassed:report.ok,installedSmoke:report,editorSha256:crypto.createHash('sha256').update(source).digest('hex'),lockSha256:crypto.createHash('sha256').update(lock).digest('hex'),signing:process.platform==='darwin'?'ad-hoc, not Developer ID signed or notarized':'not publisher-signed',linuxSmokeSandboxDisabled:process.platform==='linux',artifacts:metadata};

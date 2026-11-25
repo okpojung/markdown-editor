@@ -11,6 +11,7 @@ const {hasCompleteSplitScroll}=require('./check-split-scroll.cjs');
 const {hasCompleteProtectedExport}=require('./check-protected-export.cjs');
 const {hasCompleteToolbar}=require('./check-toolbar.cjs');
 const {hasCompleteOutline}=require('./check-outline.cjs');
+const {hasCompleteStartupView,needsUpdates}=require('./check-startup-view.cjs');
 async function run(executable,prefix,output) {
   const dir=await fs.mkdtemp(path.join(os.tmpdir(),'markdown-editor-smoke-'));
   const fixture=path.join(dir,'fixture.md');
@@ -33,7 +34,7 @@ async function run(executable,prefix,output) {
     });
   } catch(error) {childFailure=error;}
   let report=null;try{report=JSON.parse(await fs.readFile(output,'utf8'));}catch{}
-  if(childFailure||!report||report.ok!==true||!hasCompleteRenderedTail(report)||!hasCompleteTableGrid(report)||!hasCompleteSplitScroll(report)||!hasCompleteProtectedExport(report)||!hasCompleteToolbar(report)||!hasCompleteOutline(report)){
+  if(childFailure||!report||report.ok!==true||!hasCompleteRenderedTail(report)||!hasCompleteTableGrid(report)||!hasCompleteSplitScroll(report)||!hasCompleteProtectedExport(report)||!hasCompleteToolbar(report)||!hasCompleteOutline(report)||(needsUpdates(report.appVersion)&&!hasCompleteStartupView(report))){
     const evidence=await preserveSmokeEvidence(output,path.basename(output,'.json'));
     const failure=new Error((childFailure?.message||'Smoke reported failure')+'; failure report preserved: '+evidence.report);
     failure.report=report;throw failure;

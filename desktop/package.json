@@ -1,7 +1,7 @@
 {
   "name": "markdown-editor-desktop",
   "productName": "Markdown Editor",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Offline Markdown editor with Korean, English, Japanese and Simplified Chinese UI",
   "author": {
     "name": "HNG Life",
@@ -47,7 +47,18 @@
       ],
       "icon": "build/icon.ico",
       "signAndEditExecutable": true,
-      "requestedExecutionLevel": "asInvoker"
+      "requestedExecutionLevel": "asInvoker",
+      "publisherName": [
+        "HNG Life"
+      ],
+      "publish": [
+        {
+          "provider": "github",
+          "owner": "okpojung",
+          "repo": "markdown-editor",
+          "releaseType": "release"
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,
@@ -104,5 +115,9 @@
       }
     ]
   },
-  "homepage": "https://md-editor.baro.me/"
+  "homepage": "https://md-editor.baro.me/",
+  "dependencies": {
+    "electron-updater": "6.8.11",
+    "js-yaml": "4.1.1"
+  }
 }

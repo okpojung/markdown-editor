@@ -1,0 +1,23 @@
+/* Native-only controls. Portable HTML never includes this integration. */
+function initDesktopUpdateUI(){
+ const api=window.desktopAPI;if(!api?.getUpdateState)return;
+ const section=document.createElement('section');section.id='sUpdates';section.style.cssText='border-top:1px solid var(--bd);margin-top:10px;padding-top:10px';
+ const label=(node,key)=>{node.dataset.i18n=encodeURIComponent(key);node.textContent=tr(key);return node;};
+ section.append(label(document.createElement('b'),'업데이트'));
+ const autoLabel=document.createElement('label');autoLabel.className='chk';autoLabel.style.marginTop='6px';
+ const auto=document.createElement('input');auto.type='checkbox';auto.id='sUpdateAuto';auto.disabled=true;autoLabel.append(auto,label(document.createElement('span'),'새 버전 자동 확인·다운로드'));section.append(autoLabel);
+ const status=document.createElement('p');status.setAttribute('role','status');status.setAttribute('aria-live','polite');const caption=document.createElement('span');caption.id='sUpdateStatus';const detail=document.createElement('span');status.append(caption,detail);section.append(status);
+ const check=label(document.createElement('button'),'지금 업데이트 확인');check.type='button';check.id='sUpdateCheck';check.disabled=true;
+ const download=label(document.createElement('button'),'업데이트 다운로드');download.type='button';download.id='sUpdateDownload';download.hidden=true;
+ const install=label(document.createElement('button'),'설치 후 재시작');install.type='button';install.id='sUpdateInstall';install.hidden=true;
+ for(const b of [check,download,install]){b.style.marginRight='6px';section.append(b);}
+ const link=label(document.createElement('a'),'수동 업데이트');link.href='https://github.com/okpojung/markdown-editor/releases/latest';link.target='_blank';link.rel='noopener noreferrer';section.append(link);$('#sInfo').append(section);
+ const messages={idle:'새 버전을 확인할 수 있습니다.',checking:'새 버전 확인 중…','up-to-date':'최신 버전입니다.',available:'새 버전을 다운로드할 수 있습니다.',downloading:'업데이트 다운로드 중…',ready:'업데이트를 설치할 준비가 되었습니다.',installing:'업데이트 설치 중…',error:'업데이트 확인 또는 서명 검증에 실패했습니다. 수동 업데이트를 이용하세요.','signing-required':'서명된 업데이트 설정이 준비되지 않았습니다.',unsupported:'현재 플랫폼에서는 수동 업데이트를 이용하세요.'};
+ function render(value){if(!value||typeof value.phase!=='string')return;const blocked=['unsupported','signing-required'].includes(value.phase),busy=['checking','downloading','installing'].includes(value.phase);auto.checked=value.autoDownload===true;auto.disabled=blocked||value.phase==='installing';check.disabled=blocked||busy;download.hidden=value.phase!=='available';install.hidden=value.phase!=='ready';install.disabled=value.phase==='installing';label(caption,messages[value.phase]||messages.error);detail.textContent=(value.version?' · '+value.version:'')+(value.phase==='downloading'?' · '+Math.round(value.percent||0)+'%':'');}
+ const failed=()=>render({phase:'error',autoDownload:auto.checked});
+ check.onclick=()=>{check.disabled=true;api.checkForUpdates().then(render).catch(failed);};
+ download.onclick=()=>{download.disabled=true;api.downloadUpdate().then(value=>{download.disabled=false;render(value);}).catch(()=>{download.disabled=false;failed();});};
+ install.onclick=()=>{install.disabled=true;api.installUpdate().then(()=>api.getUpdateState()).then(value=>{install.disabled=false;render(value);}).catch(()=>{install.disabled=false;failed();});};
+ auto.onchange=()=>{const requested=auto.checked;auto.disabled=true;api.setAutoUpdate(requested).then(render).catch(()=>{auto.checked=!requested;failed();});};
+ api.onUpdateState(render);api.getUpdateState().then(render).catch(failed);
+}

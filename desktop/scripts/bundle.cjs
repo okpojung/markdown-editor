@@ -45,6 +45,8 @@ function replaceOnce(text, before, after) {
   js += '\n'+await fs.readFile(path.join(root,'../tests/protected-export.browser.js'),'utf8');
   js += '\n'+await fs.readFile(path.join(root,'../tests/toolbar.browser.js'),'utf8');
   js += '\n'+await fs.readFile(path.join(root,'../tests/outline.browser.js'),'utf8');
+  js += '\n'+await fs.readFile(path.join(root,'../tests/startup-view.browser.js'),'utf8');
+  js += '\n'+await fs.readFile(path.join(root,'scripts/update-ui.txt'),'utf8');
   js += '\n'+await fs.readFile(path.join(root,'scripts/renderer-integration.txt'),'utf8');
   new Function(js);
   const assetMap = Object.fromEntries(manifest.assets.map(a => [a.sourceUrl,a.id]));

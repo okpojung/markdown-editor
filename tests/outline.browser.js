@@ -1,5 +1,6 @@
 /* Disposable fixtures only. Included in the installed-app smoke, not exported HTML. */
-async function runOutlineRegression(){
+async function runOutlineRegression(options={}){
+ const languages=options.languages||['ko','en','ja','zh'];if(!Array.isArray(languages)||!languages.length||languages.length>4||new Set(languages).size!==languages.length||languages.some(l=>!['ko','en','ja','zh'].includes(l)))throw Error('Invalid test language filter');
  const m=window.MDE;if(!m||(!window.desktopAPI?.smokeTest&&!$('#mdData')?.dataset.name?.startsWith('cursor-regression')))throw Error('Isolated outline fixture required');
  const pause=ms=>new Promise(r=>setTimeout(r,ms)),cases=[],before={text:md,mode,language:uiLang,left:splitLeft,syntax:S.syntax,ratio:parseFloat($('#main').style.getPropertyValue('--l'))||50};
  const check=(ok,name,language='shared',layout='shared')=>{if(!ok){let geometry=null;try{geometry={leftY:ly(33),rightY:ry(33),selected:selLine,last:splitFollow.last,pending:splitFollow.pending,leftHeight:left().clientHeight,rightHeight:right().clientHeight};}catch{}window.__outlineRegressionFailure={name,language,layout,geometry};throw Error('Outline regression '+language+'/'+layout+'/'+name);}cases.push({language,layout,name,passed:true});};
@@ -25,7 +26,7 @@ async function runOutlineRegression(){
  const long='__underline__ ==highlight== [short](https://example.invalid/'+('longurl/'.repeat(2200))+') '+('visible body words '.repeat(350))+' FORWARD_SENTINEL '+('visible body words '.repeat(450))+' REVERSE_SENTINEL '+('tail words '.repeat(200));
  try{
   S.syntax='emm';
-  for(const language of ['ko','en','ja','zh']){m.setLanguage(language,false);
+  for(const language of languages){m.setLanguage(language,false);
    for(const layout of ['outline','split']){
     await seed(base,layout);check([...$('#tools').querySelectorAll('button,select')].every(b=>!b.disabled)&&getComputedStyle($('#outPane')).display!=='none','tools enabled',language,layout);
     for(const [kind,expected]of Object.entries({bold:'**Sample**',italic:'*Sample*',strike:'~~Sample~~',underline:'__Sample__',highlight:'==Sample==',code:'`Sample`'})){await seed(base,layout);await action(kind);check(md==='# Keep\n\n'+expected+'\n\nTail'&&document.activeElement?.closest('#outline'),'inline/'+kind,language,layout);}

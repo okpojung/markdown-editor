@@ -11,6 +11,12 @@ if (process.isMainFrame) {
   };
   contextBridge.exposeInMainWorld('desktopAPI', Object.freeze({
     smokeTest:process.argv.includes('--mde-smoke-test'),
+    getUpdateState:() => invoke('update-state'),
+    checkForUpdates:() => invoke('update-check'),
+    downloadUpdate:() => invoke('update-download'),
+    installUpdate:() => invoke('update-install'),
+    setAutoUpdate:value => invoke('update-preferences',value),
+    onUpdateState:callback => subscribe('update-state',callback),
     pickOpen:() => invoke('pick-open'),
     readFile:id => invoke('read-file',id),
     pickSave:options => invoke('pick-save',options),
