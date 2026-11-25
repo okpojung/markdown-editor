@@ -36,7 +36,7 @@ const exec=(command,args)=>new Promise((resolve,reject)=>{const p=cp.spawn(comma
   await fs.copyFile(output,path.join(root,'proof/smoke-installed.json'));
   try{await fs.copyFile(output.replace(/\.json$/,'.png'),path.join(root,'proof/smoke-installed.png'));}catch{}
   const metadata=[];
-  const published=process.platform==='win32'?[...files,'latest.yml']:files;
+  const published=process.platform==='win32'?[...files,'latest.yml']:process.platform==='linux'?[...files,'latest-linux.yml']:files;
   for(const file of published){const b=await fs.readFile(path.join(release,file));metadata.push({file,bytes:b.length,sha256:crypto.createHash('sha256').update(b).digest('hex')});}
   const source=await fs.readFile(path.join(root,'..','index.html'));
   const lock=await fs.readFile(path.join(root,'package-lock.json'));

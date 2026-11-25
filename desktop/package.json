@@ -49,7 +49,7 @@
       "signAndEditExecutable": true,
       "requestedExecutionLevel": "asInvoker",
       "publisherName": [
-        "HNG Life"
+        "SignPath Foundation"
       ],
       "publish": [
         {
@@ -90,6 +90,14 @@
       "target": [
         "AppImage",
         "deb"
+      ],
+      "publish": [
+        {
+          "provider": "github",
+          "owner": "okpojung",
+          "repo": "markdown-editor",
+          "releaseType": "release"
+        }
       ],
       "icon": "build/icon.png",
       "executableName": "markdown-editor",

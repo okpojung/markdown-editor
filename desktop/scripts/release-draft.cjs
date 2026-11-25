@@ -40,7 +40,7 @@ function selectArtifacts(c, artifacts) {
 }
 function expectedFiles(version) {
   const files=[['win-x64.exe'],['mac-x64.dmg'],['mac-arm64.dmg'],['linux-amd64.deb','linux-x86_64.AppImage']].map(xs=>xs.map(x=>'MarkdownEditor-'+version+'-'+x));
-  if(needsUpdates(version))files[0].push('latest.yml');return files;
+  if(needsUpdates(version)){files[0].push('latest.yml');files[3].push('latest-linux.yml');}return files;
 }
 function validateProof(c, proof, index) {
   const platform = ['win32','darwin','darwin','linux'][index], arch = index===2?'arm64':'x64';
@@ -50,9 +50,8 @@ function validateProof(c, proof, index) {
   for (const a of proof.artifacts) if (!a || !expected.includes(a.file) || path.basename(a.file)!==a.file || !Number.isSafeInteger(a.bytes) || a.bytes<1 || !/^[0-9a-f]{64}(?![\s\S])/.test(a.sha256 || '')) fail('PROOF_ARTIFACTS');
   return {platform,arch,runId:c.runId,sourceCommit:c.sha,appVersion:c.version,installedSmokePassed:true,renderedTailCases:34,tableGridCases:52,splitScrollCases:60,protectedExportCases:24,toolbarCases:152,outlineCases:270,artifacts:proof.artifacts.map(a=>({file:a.file,bytes:a.bytes,sha256:a.sha256}))};
 }
-function validateUpdateManifest(c,entries) {
-  const installer='MarkdownEditor-'+c.version+'-win-x64.exe';
-  const binaries=entries.filter(e=>e?.record?.file===installer),manifests=entries.filter(e=>e?.record?.file==='latest.yml');
+function validateUpdateManifest(c,entries,installer='MarkdownEditor-'+c.version+'-win-x64.exe',manifestName='latest.yml') {
+  const binaries=entries.filter(e=>e?.record?.file===installer),manifests=entries.filter(e=>e?.record?.file===manifestName);
   if(binaries.length!==1||manifests.length!==1||manifests[0].bytes.length>16384)fail('UPDATE_METADATA');
   const text=manifests[0].bytes.toString('utf8').replace(/\r\n/g,'\n');
   const m=text.match(/^version: ([^\n]+)\nfiles:\n  - url: ([^\n]+)\n    sha512: ([A-Za-z0-9+/]{86}==)\n    size: ([1-9][0-9]*)(?:\n    blockMapSize: [1-9][0-9]*)?\npath: ([^\n]+)\nsha512: ([A-Za-z0-9+/]{86}==)\nreleaseDate: ['"]([0-9TZ:.\-]+)['"]\n?(?![\s\S])/);
@@ -126,7 +125,7 @@ async function verifyDownloads(c, inputDir, outputDir, runAttempt) {
     for(const a of verified.artifacts) {const file=path.join(release,a.file);await regular(file);const bytes=await fs.readFile(file);validateBytes(a,bytes);entries.push({record:a,bytes});}
     evidence.push(verified);
   }
-  if(needsUpdates(c.version))validateUpdateManifest(c,entries);
+  if(needsUpdates(c.version)){validateUpdateManifest(c,entries);validateUpdateManifest(c,entries,'MarkdownEditor-'+c.version+'-linux-x86_64.AppImage','latest-linux.yml');}
   await fs.mkdir(outputDir);
   for(const entry of entries)await fs.writeFile(path.join(outputDir,entry.record.file),entry.bytes,{flag:'wx'});
   const sums=entries.map(e=>e.record.sha256+'  '+e.record.file).sort().join('\n')+'\n';

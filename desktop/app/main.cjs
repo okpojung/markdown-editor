@@ -12,10 +12,12 @@ const updates = require('./updates.cjs');
 let updateController, updateInstallBarrier=false, updateInterval;
 function updatePreferences() { try { const filename=path.join(app.getPath('userData'),'updates.json'),stat=fs.lstatSync(filename);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>1024)return true;const b=fs.readFileSync(filename); if(b.length>1024) return true; const p=JSON.parse(b); return p.autoDownload!==false; } catch { return true; } }
 function setupUpdates() {
-  const supported=process.platform==='win32'&&app.isPackaged&&!smoke&&!normalProbe;
+  // Windows: NSIS installer. Linux: only the AppImage runtime can replace itself. macOS and .deb stay manual.
+  const platform=process.platform;
+  const supported=app.isPackaged&&!smoke&&!normalProbe&&(platform==='win32'||(platform==='linux'&&!!process.env.APPIMAGE));
   let config=null, updater=null;
-  if(supported) { try { const b=fs.readFileSync(path.join(process.resourcesPath,'app-update.yml')); if(b.length>65536)throw Error(); config=require('js-yaml').load(b.toString()); if(updates.trustedConfig(config)){const {NsisUpdater}=require('electron-updater');updater=new NsisUpdater(updates.FEED);} }catch{} }
-  updateController=updates.createUpdateController({updater,currentVersion:app.getVersion(),config,supported,enabled:updatePreferences(),notify:value=>{send('update-state',value);if(value.phase==='error'&&updateInstallBarrier){updateInstallBarrier=false;if(mainWindow&&!mainWindow.isDestroyed())mainWindow.setEnabled(true);for(const filename of pendingFiles.splice(0))void queueFile(filename);}}});
+  if(supported) { try { const b=fs.readFileSync(path.join(process.resourcesPath,'app-update.yml')); if(b.length>65536)throw Error(); config=require('js-yaml').load(b.toString()); if(updates.trustedConfig(config,platform)){const {NsisUpdater,AppImageUpdater}=require('electron-updater');updater=platform==='win32'?new NsisUpdater(updates.FEED):new AppImageUpdater(updates.FEED);} }catch{} }
+  updateController=updates.createUpdateController({updater,currentVersion:app.getVersion(),config,supported,platform,enabled:updatePreferences(),notify:value=>{send('update-state',value);if(value.phase==='error'&&updateInstallBarrier){updateInstallBarrier=false;if(mainWindow&&!mainWindow.isDestroyed())mainWindow.setEnabled(true);for(const filename of pendingFiles.splice(0))void queueFile(filename);}}});
   if(supported&&updater) { updateInterval=setInterval(()=>{if(updateController.snapshot().autoDownload)void updateController.check();},4*60*60*1000); updateInterval.unref(); }
 }
 async function cleanForUpdate() {

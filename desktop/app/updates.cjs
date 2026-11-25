@@ -2,11 +2,15 @@
 // Native-only updater. Loading this module performs no network calls.
 const path=require('node:path');
 const {execFile}=require('node:child_process');
+const fsp=require('node:fs/promises');
 const FEED=Object.freeze({provider:'github',owner:'okpojung',repo:'markdown-editor',releaseType:'release'});
-const PUBLISHER='HNG Life';
+// Windows publisher must match the real signing certificate. For the free SignPath route this is the certificate holder, not HNG Life.
+const PUBLISHER='SignPath Foundation';
 function stableVersion(v){return typeof v==='string'&&/^(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})(?![\s\S])/.test(v);}
 function newer(a,b){if(!stableVersion(a)||!stableVersion(b))return false;const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]>y[i];}return false;}
-function trustedConfig(c){const names=Array.isArray(c?.publisherName)?c.publisherName:[c?.publisherName];return c?.provider===FEED.provider&&c.owner===FEED.owner&&c.repo===FEED.repo&&names.length===1&&names[0]===PUBLISHER;}
+function trustedConfig(c,platform='win32'){if(c?.provider!==FEED.provider||c.owner!==FEED.owner||c.repo!==FEED.repo)return false;if(platform==='linux')return c.publisherName==null;const names=Array.isArray(c.publisherName)?c.publisherName:[c.publisherName];return names.length===1&&names[0]===PUBLISHER;}
+// AppImage has no OS code signature. electron-updater checks the sha512 from latest-linux.yml before reporting a download; this rejects anything that is not a regular ELF file.
+async function verifyLinuxAppImage(filename){if(typeof filename!=='string'||!path.isAbsolute(filename)||!/\.AppImage$/i.test(filename)||/[\r\n\0]/.test(filename))throw new Error('UPDATE_IMAGE');const st=await fsp.lstat(filename);if(!st.isFile()||st.size<1024)throw new Error('UPDATE_IMAGE');const h=await fsp.open(filename,'r');try{const b=Buffer.alloc(4);await h.read(b,0,4,0);if(b.toString('hex')!=='7f454c46')throw new Error('UPDATE_IMAGE');}finally{await h.close();}return null;}
 function verifyWindowsInstaller(filename,{run=execFile,systemRoot=process.env.SystemRoot||'C:\\Windows'}={}){
  if(typeof filename!=='string'||!path.win32.isAbsolute(filename)||!filename.toLowerCase().endsWith('.exe')||/[\r\n\0]/.test(filename))return Promise.reject(new Error('UPDATE_SIGNATURE'));
  const quoted=filename.replace(/'/g,"''");
@@ -15,16 +19,16 @@ function verifyWindowsInstaller(filename,{run=execFile,systemRoot=process.env.Sy
   try{if(error||stderr)throw new Error();const r=JSON.parse(stdout);if(r.valid!==true||r.publisher!==PUBLISHER||typeof r.file!=='string'||path.win32.normalize(r.file).toLowerCase()!==path.win32.normalize(filename).toLowerCase())throw new Error();resolve(null);}catch{reject(new Error('UPDATE_SIGNATURE'));}
  }));
 }
-function createUpdateController({updater,currentVersion,config,supported,enabled=true,notify=()=>{},verify=verifyWindowsInstaller}){
- let status={phase:supported?(trustedConfig(config)&&updater?'idle':'signing-required'):'unsupported',currentVersion,autoDownload:enabled===true},candidate=null,file=null,checkTask=null,downloadTask=null,installTask=null,epoch=0;
- const available=supported&&!!updater&&trustedConfig(config)&&stableVersion(currentVersion);
+function createUpdateController({updater,currentVersion,config,supported,platform='win32',enabled=true,notify=()=>{},verify=(platform==='linux'?verifyLinuxAppImage:verifyWindowsInstaller)}){
+ let status={phase:supported?(trustedConfig(config,platform)&&updater?'idle':'signing-required'):'unsupported',currentVersion,autoDownload:enabled===true},candidate=null,file=null,checkTask=null,downloadTask=null,installTask=null,epoch=0;
+ const available=supported&&!!updater&&trustedConfig(config,platform)&&stableVersion(currentVersion);
  const snapshot=()=>({...status});
  const emit=(phase,extra={})=>{status={currentVersion,autoDownload:status.autoDownload,phase,...extra};try{notify(snapshot());}catch{}return snapshot();};
  const failed=()=>{candidate=null;file=null;return emit('error');};
  if(available){
   updater.autoDownload=false;updater.autoInstallOnAppQuit=false;updater.channel='latest';updater.allowPrerelease=false;updater.allowDowngrade=false;updater.disableWebInstaller=true;updater.disableDifferentialDownload=true;
   // The upstream verifier can skip failures on old PowerShell. This verifier never does.
-  updater.verifyUpdateCodeSignature=(_publishers,filename)=>verify(filename);
+  if(platform==='win32')updater.verifyUpdateCodeSignature=(_publishers,filename)=>verify(filename);
   updater.logger={info(){},warn(){},debug(){},error(){}};
   updater.on('error',failed);
   updater.on('checking-for-update',()=>emit('checking'));
@@ -51,4 +55,4 @@ function createUpdateController({updater,currentVersion,config,supported,enabled
  };
  return Object.freeze({snapshot,check,download,setEnabled,install});
 }
-module.exports={FEED,PUBLISHER,stableVersion,newer,trustedConfig,verifyWindowsInstaller,createUpdateController};
+module.exports={FEED,PUBLISHER,stableVersion,newer,trustedConfig,verifyWindowsInstaller,verifyLinuxAppImage,createUpdateController};
