@@ -48,9 +48,6 @@
       "icon": "build/icon.ico",
       "signAndEditExecutable": true,
       "requestedExecutionLevel": "asInvoker",
-      "publisherName": [
-        "SignPath Foundation"
-      ],
       "publish": [
         {
           "provider": "github",
