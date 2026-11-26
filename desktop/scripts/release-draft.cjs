@@ -53,10 +53,23 @@ function validateProof(c, proof, index) {
 function validateUpdateManifest(c,entries,installer='MarkdownEditor-'+c.version+'-win-x64.exe',manifestName='latest.yml') {
   const binaries=entries.filter(e=>e?.record?.file===installer),manifests=entries.filter(e=>e?.record?.file===manifestName);
   if(binaries.length!==1||manifests.length!==1||manifests[0].bytes.length>16384)fail('UPDATE_METADATA');
-  const text=manifests[0].bytes.toString('utf8').replace(/\r\n/g,'\n');
-  const m=text.match(/^version: ([^\n]+)\nfiles:\n  - url: ([^\n]+)\n    sha512: ([A-Za-z0-9+/]{86}==)\n    size: ([1-9][0-9]*)(?:\n    blockMapSize: [1-9][0-9]*)?\npath: ([^\n]+)\nsha512: ([A-Za-z0-9+/]{86}==)\nreleaseDate: ['"]([0-9TZ:.\-]+)['"]\n?(?![\s\S])/);
-  const hash=crypto.createHash('sha512').update(binaries[0].bytes).digest('base64');
-  if(!m||m[1]!==c.version||m[2]!==installer||m[3]!==hash||Number(m[4])!==binaries[0].bytes.length||m[5]!==installer||m[6]!==hash||!Number.isFinite(Date.parse(m[7])))fail('UPDATE_METADATA');
+  const lines=manifests[0].bytes.toString('utf8').replace(/\r\n/g,'\n').split('\n');
+  for(const l of lines.filter(x=>x.length&&!x.startsWith(' '))) if(!/^(version|path|sha512|releaseDate): /.test(l)&&l!=='files:')fail('UPDATE_METADATA');
+  if(lines.filter(l=>l==='files:').length!==1)fail('UPDATE_METADATA');
+  const hashOf=bytes=>crypto.createHash('sha512').update(bytes).digest('base64');
+  const expectedNames=expectedFiles(c.version).flat();
+  if(!lines.includes('version: '+c.version)||!lines.includes('path: '+installer))fail('UPDATE_METADATA');
+  if(!lines.includes('sha512: '+hashOf(binaries[0].bytes)))fail('UPDATE_METADATA');
+  if(!lines.some(l=>/^releaseDate: '[0-9TZ:.\-]+'$/.test(l)&&Number.isFinite(Date.parse(l.slice(14,-1)))))fail('UPDATE_METADATA');
+  const urls=lines.map((l,i)=>[l,i]).filter(([l])=>l.startsWith('  - url: '));
+  if(!urls.some(([l])=>l==='  - url: '+installer))fail('UPDATE_METADATA');
+  for(const [l,i] of urls){
+    const name=l.slice('  - url: '.length);
+    if(!expectedNames.includes(name))fail('UPDATE_METADATA');
+    const artifact=entries.find(e=>e?.record?.file===name);
+    if(!artifact)fail('UPDATE_METADATA');
+    if(lines[i+1]!=='    sha512: '+hashOf(artifact.bytes)||lines[i+2]!=='    size: '+artifact.bytes.length)fail('UPDATE_METADATA');
+  }
 }
 function validateBytes(record, bytes) {
   if (record.bytes!==bytes.length || record.sha256!==crypto.createHash('sha256').update(bytes).digest('hex')) fail('INSTALLER_DIGEST');
