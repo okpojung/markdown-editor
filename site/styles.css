@@ -239,3 +239,6 @@ html:not([lang="ko"]) .download-actions{flex-wrap:wrap}
 @media(min-width:1201px){.main-nav{gap:18px;font-size:12px}.header-inner{gap:18px}.main-nav .nav-cta{gap:15px;padding-inline:12px}}
 @media(max-width:900px){.desktop-grid{grid-template-columns:1fr}.desktop-card>p{min-height:0}.desktop-card{padding:23px}.download-web{gap:20px}.desktop-file{font-size:13px}}
 @media(max-width:600px){.hero-actions{gap:14px}.hero-actions .button{gap:13px;padding-inline:17px}.download-web{grid-template-columns:minmax(0,1fr)}.desktop-grid{gap:14px;margin-top:24px}.desktop-card{padding:21px 16px}.desktop-heading{gap:12px}.desktop-intro{font-size:13px}.desktop-notice{padding:18px 16px}.download-web h3{font-size:28px}.desktop-resources{gap:4px 18px}}
+
+.signing-note{margin:12px 0 0;font-size:14px;line-height:1.6;opacity:.85}
+.signing-note a{color:inherit;text-decoration:underline}

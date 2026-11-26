@@ -126,3 +126,8 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 ## 1.0.7 아웃라인 도구·양방향 분할 동기화
 
 아웃라인에서도 같은 편집 도구를 선택 항목·문자 범위에 적용합니다. 아웃라인/렌더링 분할의 스크롤과 항목 위치를 서로 맞추고 반대쪽 커서·선택·접힘은 보존합니다. 포커스에 의존하지 않는 저장 전 입력 확정과 줄바꿈 보존을 포함하며 4언어 합성 검사 270개를 설치 실행·릴리스의 필수 조건으로 확인합니다. [사용 안내](docs/outline-tools.md). EMM 앱 사본·실서버 저장·운영 반영은 별도 담당의 검증 범위입니다.
+
+
+## 코드 서명 정책
+
+Windows 설치 파일은 SignPath Foundation 무료 코드 서명을 신청·심사 중입니다. 승인되어 서명된 설치 파일이 나오기 전까지 Windows 설치 파일은 서명되지 않습니다. 정책: [CODE_SIGNING.md](https://github.com/okpojung/markdown-editor/blob/docs/code-signing-policy/CODE_SIGNING.md)
