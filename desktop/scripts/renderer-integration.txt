@@ -18,6 +18,7 @@ if (window.desktopAPI) {
     if (action === 'close') return window.close();
     if (Object.prototype.hasOwnProperty.call(ACTS,action)) ACTS[action]();
   });
+  initDesktopUpdateUI();
   window.desktopAPI.ready();
   if (window.desktopAPI.smokeTest) setTimeout(() => {
     if (!openingFile) window.desktopAPI.smokeReport({ok:false,error:'Native startup file was not delivered'});
@@ -52,6 +53,10 @@ async function runDesktopSmoke(meta) {
   const offline=await buildHtml(true);
   tests.offlineExport=offline.includes('id="sUiLanguage"')&&!protectedHtmlParts(offline).querySelector('script[src],link[rel="stylesheet"][href]');
   tests.contextIsolation=typeof require==='undefined'&&typeof process==='undefined';
+  const updateState=await api.getUpdateState();
+  tests.updateVersion=updateState.currentVersion===APP_VERSION;
+  tests.updateNetworkDisabledInSmoke=updateState.phase==='unsupported';
+  tests.updateSettingsPresent=!!document.getElementById('sUpdates')&&document.getElementById('sUpdateCheck').disabled&&document.getElementById('sUpdateInstall').hidden;
   const renderedTailBrowser=await runRenderedTailRegression();
   tests.renderedTailBrowser=renderedTailBrowser?.passed===true;
   const tableGridBrowser=await runTableGridRegression();
@@ -62,10 +67,12 @@ async function runDesktopSmoke(meta) {
   tests.toolbarBrowser=toolbarBrowser?.passed===true;
   const outlineBrowser=await runOutlineRegression();
   tests.outlineBrowser=outlineBrowser?.passed===true;
+  const startupViewBrowser=await runStartupViewRegression();
+  tests.startupViewBrowser=startupViewBrowser?.passed===true;
   const protectedExportBrowser=await runProtectedExportRegression(window.desktopMakeHandle(meta));
   tests.protectedExportBrowser=protectedExportBrowser?.passed===true;
   tests.nativeEncryptedFileRoundtrip=protectedExportBrowser?.nativeFileRoundtrip===true;
   drawSettings();$('#sdlg').hidden=false;
   await new Promise(r=>setTimeout(r,800));
-  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,renderedTailBrowser,tableGridBrowser,toolbarBrowser,splitScrollBrowser,protectedExportBrowser,uiLanguages:4,nativeFileRoundtrip:true,outlineBrowser});
+  api.smokeReport({ok:Object.values(tests).every(Boolean),tests,renderedTailBrowser,tableGridBrowser,toolbarBrowser,splitScrollBrowser,protectedExportBrowser,uiLanguages:4,nativeFileRoundtrip:true,outlineBrowser,startupViewBrowser});
 }

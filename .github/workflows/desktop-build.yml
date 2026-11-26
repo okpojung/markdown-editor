@@ -79,6 +79,8 @@ jobs:
           name: markdown-editor-${{ matrix.name }}
           path: |
             desktop/release/*.exe
+            desktop/release/latest.yml
+            desktop/release/latest-linux.yml
             desktop/release/*.dmg
             desktop/release/*.AppImage
             desktop/release/*.deb

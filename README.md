@@ -8,6 +8,8 @@
 
 - **보기 4가지**: 마크다운 원문 / 아웃라인 / 렌더링 / 분할(원문 또는 아웃라인 + 렌더링, 양쪽 모두 편집·자동 동기화)
 - **분할 창 크기 조절**: 가운데 막대를 끌어서 조절, 더블클릭하면 반반
+- **분할 창 닫기**: 각 창 오른쪽 위 X로 반대쪽 단일 보기 전환, 단일 보기에서는 X 숨김
+- **시작 보기 설정**: 기본 렌더링 보기와 원문·아웃라인·렌더링·분할 선택, 설정 하단 버전·공식 웹사이트
 - **왼쪽 목차**: 접기/펼치기, 누르면 해당 제목으로 이동
 - **아웃라인 편집**: 선택 항목·부분 선택에 편집 도구 적용, Enter 새 항목, Tab/Shift+Tab 들여쓰기, Alt+↑↓ 이동, 끌어서 이동, Ctrl+Z/Y
 - **편집 도구 한 줄**: 제목(H1~H6), 굵게·기울임·취소선·밑줄·하이라이트, 글머리·번호·체크박스, 링크, 인라인 코드, 코드 블록, 표 — 커서가 있는 창(원문·아웃라인 또는 렌더링)에 적용
@@ -49,6 +51,10 @@ Chrome·Edge에서는 처음 저장할 때 파일 위치를 고르면 그다음�
 | `docs/outline-tools.md` | 아웃라인 편집 도구·분할 양방향 위치 동기화 안내 |
 | `tests/outline.browser.js` | 4언어·아웃라인/분할의 합성 회귀 검사 270개 |
 | `desktop/scripts/check-outline.cjs` | 설치 실행·릴리스에서 정확한 검사 목록을 검증하는 게이트 |
+| `docs/startup-view-and-updates.md` | 미공개 1.0.8 후보의 보기·설정·Windows 업데이트 범위와 서명 제약 |
+| `tests/startup-view.browser.js`, `desktop/scripts/check-startup-view.cjs` | 새 보기·설정 62개 회귀와 설치·릴리스 증거 게이트 |
+| `desktop/app/updates.cjs`, `desktop/scripts/update-ui.txt` | Windows 업데이트 제어·서명 실패 차단·설정 UI |
+| `desktop/test/startup-view.test.cjs`, `desktop/test/updates.test.cjs` | 보기·메타데이터·업데이트 안전성 단위 검사 |
 
 ## 사용한 오픈소스
 
@@ -63,7 +69,7 @@ Chrome·Edge에서는 처음 저장할 때 파일 위치를 고르면 그다음�
 
 ## 임베드(iframe)
 
-직접 부모의 `mde:config {name,saveLabel}`로 파일 이름과 저장 단추를 설정합니다. 그 모드의 저장·Ctrl/Cmd+S는 `mde:save {markdown}`를 부모에게 보내며, 실제 저장 성공 후 `mde:saved` 응답으로 저장 상태를 확정합니다. 기존 set/get/mode/change/close API는 유지합니다. iframe은 기본 목차를 접고 파일·보기·편집 그룹을 한 줄에 배치합니다. 문서 닫기는 파일 메뉴에서, 분할 왼쪽 창 닫기는 해당 창의 닫기 아이콘에서 실행합니다. [연동 계약·저장 동시성·보안 및 검사](docs/iframe-embed.md)를 참고하세요.
+직접 부모의 `mde:config {name,saveLabel}`로 파일 이름과 저장 단추를 설정합니다. 그 모드의 저장·Ctrl/Cmd+S는 `mde:save {markdown}`를 부모에게 보내며, 실제 저장 성공 후 `mde:saved` 응답으로 저장 상태를 확정합니다. 기존 set/get/mode/change/close API는 유지합니다. iframe은 기본 목차를 접고 파일·보기·편집 그룹을 한 줄에 배치합니다. 문서 닫기는 파일 메뉴에서, 분할 창 닫기는 각 창 오른쪽 위 X에서 실행합니다. [연동 계약·저장 동시성·보안 및 검사](docs/iframe-embed.md)를 참고하세요.
 
 ## 라이선스
 
@@ -131,3 +137,12 @@ Windows x64(.exe), macOS Intel/Apple Silicon(.dmg), Linux x64(.deb/AppImage)를 
 ## 코드 서명 정책
 
 Windows 설치 파일은 SignPath Foundation 무료 코드 서명을 신청·심사 중입니다. 승인되어 서명된 설치 파일이 나오기 전까지 Windows 설치 파일은 서명되지 않습니다. 정책: [CODE_SIGNING.md](https://github.com/okpojung/markdown-editor/blob/docs/code-signing-policy/CODE_SIGNING.md)
+
+## 1.0.8 설치 앱 업데이트
+
+- **Linux AppImage**: AppImage로 실행한 경우에만 새 버전을 확인하고 다운로드합니다. 설치 전에 미저장 문서가 있으면 설치하지 않으며, 승인 후에만 교체하고 재시작합니다.
+- **Windows**: 자동 설치 코드가 들어 있지만, 정식 코드 서명(SignPath 승인)이 확인되기 전까지 서명 검증에서 차단되어 수동 다운로드를 안내합니다.
+- **macOS**: 수동 업데이트입니다. 자동 업데이트에는 Developer ID 서명과 공증이 필요합니다.
+- 1.0.7 이하에는 업데이터가 없어서, 1.0.8은 한 번 수동 설치해야 합니다.
+
+자세한 기능·검증·제한은 [docs/startup-view-and-updates.md](docs/startup-view-and-updates.md)를 참고하세요.

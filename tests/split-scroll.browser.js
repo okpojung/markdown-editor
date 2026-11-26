@@ -1,5 +1,6 @@
 /* Run only on a disposable fixture, or Electron's guarded smoke document. */
-async function runSplitScrollRegression() {
+async function runSplitScrollRegression(options={}) {
+ const languages=options.languages||['ko','en','ja','zh'];if(!Array.isArray(languages)||!languages.length||languages.length>4||new Set(languages).size!==languages.length||languages.some(l=>!['ko','en','ja','zh'].includes(l)))throw Error('Invalid test language filter');
   const m=window.MDE;
   if(!m||(!window.desktopAPI?.smokeTest&&!document.getElementById('mdData')?.dataset.name?.startsWith('cursor-regression')))throw Error('Isolated split fixture required');
   const cases=[],pause=ms=>new Promise(r=>setTimeout(r,ms));
@@ -15,7 +16,7 @@ async function runSplitScrollRegression() {
   const settled=async fn=>{for(let i=0;i<100&&!fn();i++)await pause(30);};
   const sourceScroll=async n=>{m.cm.getScrollerElement().dispatchEvent(new WheelEvent('wheel',{deltaY:1,bubbles:true}));m.cm.scrollTo(null,m.cm.charCoords({line:srcLine(n),ch:0},'local').top);await pause(90);await settled(()=>close(n));};
   const renderedScroll=async n=>{const box=rendered();box.dispatchEvent(new WheelEvent('wheel',{deltaY:1,bubbles:true}));box.scrollTop+=renderedY(n)-24;box.dispatchEvent(new Event('scroll'));await pause(90);await settled(()=>close(n));};
-  for(const language of ['ko','en','ja','zh']) {
+  for(const language of languages) {
     m.ed.blur();m.setLanguage(language,false);m.setMarkdown(text);m.setMode('split');await pause(140);
     m.cm.focus();m.cm.setCursor({line:0,ch:0});await pause(70);
     await sourceScroll(12);check(close(12),'source scroll matches block',language);
@@ -49,7 +50,7 @@ async function runSplitScrollRegression() {
   m.ed.focus();m.ed.eventEmitter.emit('focus','wysiwyg');m.ed.setSelection(pmPos(10));m.ed.insertText('WWNEW');m.ed.eventEmitter.emit('change','wysiwyg');await settled(()=>m.markdown.includes('WWNEW'));await pause(150);await renderedScroll(32);await settled(()=>close(32)&&m.markdown.includes('WWNEW'));check(close(32)&&m.markdown.includes('WWNEW'),'rendered edit debounce refreshes mapping');
 
   const originalSyntax=m.settings.syntax;
-  try{for(const language of ['ko','en','ja','zh']){
+  try{for(const language of languages){
     m.ed.blur();m.setLanguage(language,false);m.settings.syntax='emm';
     const longText='__underline__ ==highlight== [short](https://example.invalid/'+('longurl/'.repeat(2500))+') FORWARD_SENTINEL '+('visible body words '.repeat(800))+' REVERSE_SENTINEL '+('tail words '.repeat(100));
     m.setMarkdown(longText);m.setMode('split');await pause(180);

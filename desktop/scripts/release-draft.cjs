@@ -10,6 +10,7 @@ const {hasCompleteSplitScroll}=require('./check-split-scroll.cjs');
 const {hasCompleteProtectedExport}=require('./check-protected-export.cjs');
 const {hasCompleteToolbar}=require('./check-toolbar.cjs');
 const {hasCompleteOutline}=require('./check-outline.cjs');
+const {hasCompleteStartupView,needsUpdates}=require('./check-startup-view.cjs');
 const PLATFORMS = ['windows-x64','mac-intel-x64','mac-apple-arm64','linux-x64'];
 const JOBS = ['lock','build (windows-2025, x64, win, windows-x64)','build (macos-15-intel, x64, mac, mac-intel-x64)','build (macos-15, arm64, mac, mac-apple-arm64)','build (ubuntu-24.04, x64, linux, linux-x64)'];
 const fail = code => { throw new Error(code); };
@@ -38,15 +39,24 @@ function selectArtifacts(c, artifacts) {
   });
 }
 function expectedFiles(version) {
-  return [['win-x64.exe'],['mac-x64.dmg'],['mac-arm64.dmg'],['linux-amd64.deb','linux-x86_64.AppImage']].map(xs=>xs.map(x=>'MarkdownEditor-'+version+'-'+x));
+  const files=[['win-x64.exe'],['mac-x64.dmg'],['mac-arm64.dmg'],['linux-amd64.deb','linux-x86_64.AppImage']].map(xs=>xs.map(x=>'MarkdownEditor-'+version+'-'+x));
+  if(needsUpdates(version)){files[0].push('latest.yml');files[3].push('latest-linux.yml');}return files;
 }
 function validateProof(c, proof, index) {
   const platform = ['win32','darwin','darwin','linux'][index], arch = index===2?'arm64':'x64';
-  if (!proof || String(proof.runId)!==c.runId || proof.sourceCommit!==c.sha || proof.appVersion!==c.version || proof.platform!==platform || proof.arch!==arch || proof.installedSmokePassed!==true || proof.installedSmoke?.ok!==true || proof.installedSmoke?.appVersion!==c.version || !hasCompleteRenderedTail(proof.installedSmoke) || !hasCompleteTableGrid(proof.installedSmoke) || !hasCompleteSplitScroll(proof.installedSmoke) || !hasCompleteProtectedExport(proof.installedSmoke) || !hasCompleteToolbar(proof.installedSmoke)||!hasCompleteOutline(proof.installedSmoke)) fail('BUILD_PROOF');
+  if (!proof || String(proof.runId)!==c.runId || proof.sourceCommit!==c.sha || proof.appVersion!==c.version || proof.platform!==platform || proof.arch!==arch || proof.installedSmokePassed!==true || proof.installedSmoke?.ok!==true || proof.installedSmoke?.appVersion!==c.version || !hasCompleteRenderedTail(proof.installedSmoke) || !hasCompleteTableGrid(proof.installedSmoke) || !hasCompleteSplitScroll(proof.installedSmoke) || !hasCompleteProtectedExport(proof.installedSmoke) || !hasCompleteToolbar(proof.installedSmoke)||!hasCompleteOutline(proof.installedSmoke)||(needsUpdates(c.version)&&(!hasCompleteStartupView(proof.installedSmoke)||proof.installedSmoke.tests.updateVersion!==true||proof.installedSmoke.tests.updateNetworkDisabledInSmoke!==true||proof.installedSmoke.tests.updateSettingsPresent!==true))) fail('BUILD_PROOF');
   const expected = expectedFiles(c.version)[index];
   if (!Array.isArray(proof.artifacts) || proof.artifacts.length!==expected.length || new Set(proof.artifacts.map(a=>a?.file)).size!==expected.length) fail('PROOF_ARTIFACTS');
   for (const a of proof.artifacts) if (!a || !expected.includes(a.file) || path.basename(a.file)!==a.file || !Number.isSafeInteger(a.bytes) || a.bytes<1 || !/^[0-9a-f]{64}(?![\s\S])/.test(a.sha256 || '')) fail('PROOF_ARTIFACTS');
   return {platform,arch,runId:c.runId,sourceCommit:c.sha,appVersion:c.version,installedSmokePassed:true,renderedTailCases:34,tableGridCases:52,splitScrollCases:60,protectedExportCases:24,toolbarCases:152,outlineCases:270,artifacts:proof.artifacts.map(a=>({file:a.file,bytes:a.bytes,sha256:a.sha256}))};
+}
+function validateUpdateManifest(c,entries,installer='MarkdownEditor-'+c.version+'-win-x64.exe',manifestName='latest.yml') {
+  const binaries=entries.filter(e=>e?.record?.file===installer),manifests=entries.filter(e=>e?.record?.file===manifestName);
+  if(binaries.length!==1||manifests.length!==1||manifests[0].bytes.length>16384)fail('UPDATE_METADATA');
+  const text=manifests[0].bytes.toString('utf8').replace(/\r\n/g,'\n');
+  const m=text.match(/^version: ([^\n]+)\nfiles:\n  - url: ([^\n]+)\n    sha512: ([A-Za-z0-9+/]{86}==)\n    size: ([1-9][0-9]*)(?:\n    blockMapSize: [1-9][0-9]*)?\npath: ([^\n]+)\nsha512: ([A-Za-z0-9+/]{86}==)\nreleaseDate: ['"]([0-9TZ:.\-]+)['"]\n?(?![\s\S])/);
+  const hash=crypto.createHash('sha512').update(binaries[0].bytes).digest('base64');
+  if(!m||m[1]!==c.version||m[2]!==installer||m[3]!==hash||Number(m[4])!==binaries[0].bytes.length||m[5]!==installer||m[6]!==hash||!Number.isFinite(Date.parse(m[7])))fail('UPDATE_METADATA');
 }
 function validateBytes(record, bytes) {
   if (record.bytes!==bytes.length || record.sha256!==crypto.createHash('sha256').update(bytes).digest('hex')) fail('INSTALLER_DIGEST');
@@ -115,6 +125,7 @@ async function verifyDownloads(c, inputDir, outputDir, runAttempt) {
     for(const a of verified.artifacts) {const file=path.join(release,a.file);await regular(file);const bytes=await fs.readFile(file);validateBytes(a,bytes);entries.push({record:a,bytes});}
     evidence.push(verified);
   }
+  if(needsUpdates(c.version)){validateUpdateManifest(c,entries);validateUpdateManifest(c,entries,'MarkdownEditor-'+c.version+'-linux-x86_64.AppImage','latest-linux.yml');}
   await fs.mkdir(outputDir);
   for(const entry of entries)await fs.writeFile(path.join(outputDir,entry.record.file),entry.bytes,{flag:'wx'});
   const sums=entries.map(e=>e.record.sha256+'  '+e.record.file).sort().join('\n')+'\n';
@@ -146,5 +157,5 @@ async function main() {
   }
   console.log(mode==='preflight'?'Release preflight passed.':'Draft release created; not published.');
 }
-module.exports={inputs,validateRun,selectArtifacts,expectedFiles,validateProof,validateBytes,validateReleaseFiles,releaseArgs,verifyDownloads};
+module.exports={inputs,validateRun,selectArtifacts,expectedFiles,validateProof,validateBytes,validateReleaseFiles,releaseArgs,verifyDownloads,validateUpdateManifest};
 if(require.main===module)main().catch(()=>{console.error('Release draft stopped: validation, API or draft creation failed. No secrets or remote error bodies are logged.');process.exitCode=1;});

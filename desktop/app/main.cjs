@@ -8,6 +8,31 @@ const crypto = require('node:crypto');
 const {fileURLToPath} = require('node:url');
 const security = require('./security.cjs');
 const diagnostics = require('./startup-diagnostics.cjs');
+const updates = require('./updates.cjs');
+let updateController, updateInstallBarrier=false, updateInterval;
+function updatePreferences() { try { const filename=path.join(app.getPath('userData'),'updates.json'),stat=fs.lstatSync(filename);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>1024)return true;const b=fs.readFileSync(filename); if(b.length>1024) return true; const p=JSON.parse(b); return p.autoDownload!==false; } catch { return true; } }
+function setupUpdates() {
+  // Windows: NSIS installer. Linux: only the AppImage runtime can replace itself. macOS and .deb stay manual.
+  const platform=process.platform;
+  const supported=app.isPackaged&&!smoke&&!normalProbe&&(platform==='win32'||(platform==='linux'&&!!process.env.APPIMAGE));
+  let config=null, updater=null;
+  if(supported) { try { const b=fs.readFileSync(path.join(process.resourcesPath,'app-update.yml')); if(b.length>65536)throw Error(); config=require('js-yaml').load(b.toString()); if(updates.trustedConfig(config,platform)){const {NsisUpdater,AppImageUpdater}=require('electron-updater');updater=platform==='win32'?new NsisUpdater(updates.FEED):new AppImageUpdater(updates.FEED);} }catch{} }
+  updateController=updates.createUpdateController({updater,currentVersion:app.getVersion(),config,supported,platform,enabled:updatePreferences(),notify:value=>{send('update-state',value);if(value.phase==='error'&&updateInstallBarrier){updateInstallBarrier=false;if(mainWindow&&!mainWindow.isDestroyed())mainWindow.setEnabled(true);for(const filename of pendingFiles.splice(0))void queueFile(filename);}}});
+  if(supported&&updater) { updateInterval=setInterval(()=>{if(updateController.snapshot().autoDownload)void updateController.check();},4*60*60*1000); updateInterval.unref(); }
+}
+async function cleanForUpdate() {
+  if(!mainWindow||mainWindow.isDestroyed()||!rendererReady||closing)return false;
+  const dirty=await mainWindow.webContents.executeJavaScript('(()=>{flushPendingEdits();updStatus();return isDirty();})()');
+  if(typeof dirty!=='boolean')return false;state.dirty=dirty;return !dirty;
+}
+async function confirmUpdateInstall() {
+  const text={ko:['업데이트 설치','문서를 먼저 저장한 뒤 업데이트를 설치해 주세요.','앱을 종료하고 업데이트를 설치한 뒤 다시 시작할까요?','취소','설치 후 재시작'],en:['Install update','Save your document before installing the update.','Close the app, install the update and restart?','Cancel','Install and restart'],ja:['更新のインストール','更新する前に文書を保存してください。','アプリを終了し、更新して再起動しますか？','キャンセル','更新して再起動'],zh:['安装更新','请先保存文档再安装更新。','关闭应用、安装更新并重新启动？','取消','安装并重启']}[state.lang];
+  if(!await cleanForUpdate()){if(mainWindow&&!mainWindow.isDestroyed())await dialog.showMessageBox(mainWindow,{type:'warning',title:text[0],message:text[1]});return false;}
+  const answer=await dialog.showMessageBox(mainWindow,{type:'question',title:text[0],message:text[2],buttons:[text[3],text[4]],defaultId:0,cancelId:0,noLink:true});
+  if(answer.response!==1||!mainWindow||mainWindow.isDestroyed())return false;
+  updateInstallBarrier=true;mainWindow.setEnabled(false);
+  return await cleanForUpdate();
+}
 const normalArgs = process.argv.filter(a => a.startsWith('--ci-normal-'));
 const normalRequested = normalArgs.length > 0;
 const normalMode = process.argv.find(a => a.startsWith('--ci-normal-probe='))?.slice('--ci-normal-probe='.length);
@@ -124,10 +149,10 @@ function handle(channel, fn) {
 }
 function on(channel, fn) { ipcMain.on('desktop:' + channel, (event, ...args) => { try { authorized(event); fn(...args); } catch {} }); }
 function send(channel, payload) { if (rendererReady && mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('desktop:' + channel, payload); }
-function action(name) { if (name === 'close') mainWindow?.close(); else send('menu-action', name); }
+function action(name) { if(updateInstallBarrier)return; if (name === 'close') mainWindow?.close(); else send('menu-action', name); }
 async function queueFile(filename) {
   if (typeof filename !== 'string' || !path.isAbsolute(filename)) return;
-  if (!rendererReady || !capabilities) { if (pendingFiles.length < 128) pendingFiles.push(filename); return; }
+  if (!rendererReady || !capabilities || updateInstallBarrier) { if (pendingFiles.length < 128) pendingFiles.push(filename); return; }
   try { const cap = await capabilities.grant(filename, 'read'); send('open-file', cap); } catch { if (!smoke && mainWindow && !mainWindow.isDestroyed()) dialog.showMessageBox(mainWindow, {type:'error', message:STRINGS[state.lang].error}).catch(() => {}); }
 }
 function argvFiles(argv) { return argv.filter(a => typeof a === 'string' && !a.startsWith('-') && path.isAbsolute(a) && security.OPEN_EXTENSIONS.has(path.extname(a).toLowerCase())); }
@@ -153,6 +178,11 @@ async function confirmClose(event) {
   } finally { closePrompt = false; }
 }
 function setupIPC() {
+  handle('update-state',()=>updateController.snapshot());
+  handle('update-check',()=>updateController.check());
+  handle('update-download',()=>updateController.download());
+  handle('update-preferences',async value=>{if(typeof value!=='boolean')throw Error();const filename=path.join(app.getPath('userData'),'updates.json'),temporary=filename+'.'+crypto.randomUUID()+'.tmp';try{await fsp.writeFile(temporary,JSON.stringify({autoDownload:value}),{flag:'wx',mode:0o600});await fsp.rename(temporary,filename);}finally{await fsp.unlink(temporary).catch(()=>{});}updateController.setEnabled(value);if(value)void updateController.check();return updateController.snapshot();});
+  handle('update-install',async()=>{if(updateInstallBarrier)return false;let accepted=false;try{accepted=await updateController.install(confirmUpdateInstall,cleanForUpdate);return accepted;}finally{if(!accepted){updateInstallBarrier=false;if(mainWindow&&!mainWindow.isDestroyed())mainWindow.setEnabled(true);for(const filename of pendingFiles.splice(0))void queueFile(filename);}}});
   handle('pick-open', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {properties:['openFile','multiSelections'], filters:[{name:'Text / Markdown / HTML', extensions:['md','markdown','txt','html']}]});
     if (result.canceled) return null;
@@ -182,7 +212,7 @@ function setupIPC() {
     const changed = value.lang !== state.lang; state = {dirty:value.dirty,lang:value.lang};
     mainWindow.setDocumentEdited(state.dirty); if (changed) installMenu();
   });
-  on('ready', () => { if (rendererReady) return; rendererReady = true; if (editorLoaded) clearTimeout(readyTimer); void runNormalProbe(); for (const filename of pendingFiles.splice(0)) void queueFile(filename); });
+  on('ready', () => { if (rendererReady) return; rendererReady = true; if(updateController?.snapshot().autoDownload)void updateController.check(); if (editorLoaded) clearTimeout(readyTimer); void runNormalProbe(); for (const filename of pendingFiles.splice(0)) void queueFile(filename); });
   on('smoke-report', report => {
     if (!smoke || !report || typeof report !== 'object' || Array.isArray(report)) return;
     try { if (Buffer.byteLength(JSON.stringify(report)) > 65536 || typeof report.ok !== 'boolean') return; void finishSmoke(report); } catch {}
@@ -243,6 +273,7 @@ else {
       if (typeof html !== 'string') return new Response('Not found',{status:404,headers:{'Content-Security-Policy':security.PREVIEW_CSP}});
       return new Response(html,{headers:{'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':security.PREVIEW_CSP,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'}});
     });
+    setupUpdates();
     setupIPC();
     // Expanded locale and long-link UI suite only; normal startup timeout is unchanged.
     if (smoke) smokeTimer = setTimeout(() => { void finishSmoke({ok:false,error:'Smoke test timeout'}); },240000);
