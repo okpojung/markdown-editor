@@ -25,4 +25,4 @@ The optional automatic update check (Windows and Linux AppImage builds) only rea
 ## Contact
 
 - Maintainer: [okpojung](https://github.com/okpojung)
-- Contact e-mail: (to be filled in by the maintainer before submitting)
+- Contact: through the GitHub profile and repository issues. The application e-mail is provided to SignPath Foundation only.
